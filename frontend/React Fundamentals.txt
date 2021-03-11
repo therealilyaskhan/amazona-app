@@ -65,6 +65,7 @@ public Folder:
 
 src Folder:
         We create our components inside this folder;
+        The create react app provides us with a default component called App inside this src folder implemented in a file name App.js; A react application is made up of these things called "components" and the Parent-Level component of each react app typically is this <App /> component from inside of which all other modular components are referenced!!
         You are going to create a components folder inside this src folder and inside that components folder you are going to create different modular components and the css files specific to these components
         These React Components inside the components folder are going to be referenced from inside of the App.js file which is the Grand Parent Component that is going to be mounted onto the html container element, and this App.js file is then referenced from inside of the index.js file which mounts this <App /> component coming from the App.js file;
         create react app by default creates for us an <App /> component inside of this src folder in a file names App.js;
