@@ -65,11 +65,135 @@ public Folder:
 
 src Folder:
         We create our components inside this folder;
-        The create react app provides us with a default component called App inside this src folder implemented in a file name App.js; A react application is made up of these things called "components" and the Parent-Level component of each react app typically is this <App /> component from inside of which all other modular components are referenced!!
+        The create react app provides us with a default component called App inside this src folder implemented in a file name App.js; A react application is made up of these things called "components" and the Parent-Level component of each react app typically is this <App /> component from inside of which all other modular components are referenced!! so basically you can have components inside of a component as child components; that's how a whole react app is built;
         You are going to create a components folder inside this src folder and inside that components folder you are going to create different modular components and the css files specific to these components
         These React Components inside the components folder are going to be referenced from inside of the App.js file which is the Grand Parent Component that is going to be mounted onto the html container element, and this App.js file is then referenced from inside of the index.js file which mounts this <App /> component coming from the App.js file;
         create react app by default creates for us an <App /> component inside of this src folder in a file names App.js;
         the index.js in src folder is responsible for rendering the components to the DOM (inside the index.html file on the root container;)
-        Here is also where you add css files which will be specific to certain components you add in this src folder;
+        Here is also where you add css files which will be specific to certain components you add in this src folder; normally the CSS file that you create for a specific component would have the same name as the file name holding the component; e:g for <App /> component inside of the App.js file we have by default an App.css file which holds styles for this App component exclusively;
         In here is going to be all the source files, here is where we are going to spend most of our time and do our modifications such as adding components etc, creating different subfolders for components;
 
+////////////////////////////////////////////////////////////////
+
+//////////////////////////
+react-router-dom
+//////////////////////////
+It is not part of the core react library;
+
+It is an extension to the core react library;
+
+The core react library itself is not capable of dealing with routes and URLs; it is the react-router-dom extension to the core react that enables react to deal with routes;
+
+It Lets react switch between and render different components based upon different URLs;
+
+To mount / render different components onto the 'root' DOM element based upon the URL, you make user of a library called react-router-dom;
+
+So the changing of the content on a page for different URLs is delegated to bundled react javascript file that was sent back over to the browser as response to the initial request;
+
+"React" (used to create components),  "React-DOM" (used to render components to the DOM), "Babel" (used to createElements) and the "React Router" all these things are there on the browser after the user's initial request taking full control of the react application and rendering different contents based upon different URLs which is routing and is something made possible via the library "react-router";
+
+"React Router" intercepts a request and stop it from proceeding to the server and handles it on the front-end; based upon the requested URL react router is going to inject the associated react component onto the 'root' dom element;
+
+SO IN SHORT:
+                "react router is like a director that tells react dynamically which component to mount onto the 'root' container based upon a given URL"
+
+Let's say our react application is going have 10 different pages:
+
+1                home
+2                contact
+3                login
+4                profile
+5                signup
+6                collection
+7                about
+8                admin
+9                404
+10               catalog
+
+For each page we are gong to create a top level component; so basically we are going to associate each route with a top level component or page; and this top level component is going to be the one which is going to be dynamically injected onto the 'root' container based upon the URL;
+
+This is a routing library for react application that enables you do define multiple routes in your application and associate each route with a specific component that is going to be rendered by the react onto the 'root' container;
+
+/////////////////////////////////////
+        react-router-dom job
+/////////////////////////////////////
+react-router-dom library is an extension to the core react library that offers us components such as { BrowserRouter, Route, Switch, Link } etc which enables react to serve different components based upon different URLs;
+
+Such as the BrowserRouter component from the react-router-dom library keeps track of the current location(URL), the previous locations (past URLs) and also what location the user is accessing next;
+
+This BrowserRouter component is going to be the top most component wrapping entirely all other components so as to provide this whole location (URL) information throughout our app;
+
+Normally you would wrap the <App /> component inside the index.js file since that is already the top most component from inside of which all other components are referenced;
+
+And then since our <App /> component is already wrapped inside the BrowserRouter component and we already have that location information available to all the components down the family tree so inside the App component, we would normally write the logic for routing, and define "routes" via the <Route />
+
+"Route" component is used to define paths for components and also it renders its child component if the current location coming from the BrowserRouter matches the path defined by it.
+
+Ideally, a <Route> component should have a prop named path, and if the path name matches the current location, it gets rendered.
+
+The path prop is used to identify the portion of the URL that the router should match. It uses the Path-to-RegExp library to turn this path string into a regular expression. It will then be matched against the current location.
+
+The <Link> component, on the other hand, is used to navigate between pages. It’s comparable to the HTML anchor element. However, using anchor links would result in a full page refresh, which we don’t want. So instead, we can use <Link> to navigate to a particular URL and have the view re-rendered without a refresh.
+
+The <Switch /> component from the react-router-dom exactly acts as the normal "switch statement construct" inside a programming language and it is in fact named after that switch statement since the normal switch construct would let only one matched case execute and then break out of the switch statement no matter if some other cases coming down the road would also match or not, and if you accidentally forget the break; statement then the switch would go for other cases: down the road as well and if another case is matched the block of code under that case would also be executed;
+
+same is the job of the <Switch /> component here, it breaks out of the process of matching the current location with different paths defined by the <Route /> component right after finding the first matched path and doesn't go down the road and never frisks rest of the <Route /> components for a path match;
+
+since the Path-to-RegExp library is used to turn the defined path string into a regular expression. and then that regular expression is matched against the current location with the global flag enabled.
+
+so it means that if we have the paths in the following order:
+
+'/'
+'/contact'
+
+so the above paths be converted into regular expressions; now when it comes to routing the requested route will be treated as 'TEXT' and the defined paths will be treated as the 'REGEX'
+
+so let's say that our requested route was one of the followings:
+
+'/'
+'/c'
+'/co'
+'/con'
+'/cont'
+'/conta'
+'/contac'
+'/contact'
+'/contactttttttt'
+
+all of the above requested routes will be treated as plain texts; and our defined routes: ('/' and '/contact') as REGEX; 
+
+NOW OUT OF OUR TWO REGULAR REXPRESSIONS:
+'/'
+'/contact'
+
+first he '/' will be sort of put upon the the requested route and will be checked if a match is found; let's say the requested ROUTE was:
+
+REQUESTED ROUTE :    '/'
+
+so our pre defined route (RegEx) '/' will be put upon it and will the regex will be sort of frisked inside of the requested route (which is treated as text) and since:
+
+TO BE FRISKED = '/'
+and
+TO FRISK = '/'
+
+both matches so the <Route /> matches and the component is rendered;
+
+for other requested routes:
+
+TO BE FRISKED:-
+'/co'
+'/con'
+'/cont'
+'/conta'
+'/contac'
+'/contactttttttt'
+
+TO FRISK:
+(pre defined route)
+'/'
+
+so inside all the above routes there can be seen a forward slash '/', so for all the above requested routes the defined route '/' will pass and thus the component against the path '/' will be rendered;
+
+so by wrapping all of our <Route /> components inside of the <Switch /> component we make sure that only the first matching <Route /> component is rendered to the DOM;
+
+and finally: If you want a <Route /> to be rendered only if the paths are exactly the same, you should use the exact prop.
