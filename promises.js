@@ -191,6 +191,157 @@ By the time the state of this promise object (one being processed by the calcula
 SO: as soon as the promise object that was returned by the dot .then() method have its status update "resolved" (as a result of the being proportional to the values of the object returned by the onFulfilled method), the next dot .then() method would be waiting till now and as it sees that the Promise object on which it is being invoked will push one of its handlers (onFulfilled or onReject) into the job queue (depending upon the status of the Promise Object) and so on the chain will grow like this thus letting us to divide a huge task into chunks by allowing different callbacks to process the previously returned value from the previous onFulfilled callback asynchronously....... THIS IS HOW WE IMPLEMENT PROMISE CHAINS...... FEWWWWWW pretty complex han ? not quite
 
 IN SIMPLE WORDS: the onFulfilled function of the next dot .then() method will be pushed into the job queue when the promise object which was returned from the onFulfilled function of the previous dot .then() method gets resolved. and that resolves after a delay of our mentioned milliseconds !
+
+ONE LAST IMPORTANT POINT:
+            remember that it is not the "callback passed to the Promise() constructor while creating a new promise" that executes asynchronously BUT it is the onFulfilled or onReject callback (which is passed to the dot .then() method while consuming the promise) that is added to the JOB QUEUE and executed Asynchronously;
+
+            Once a Promise is fulfilled or rejected, the respective handler function (onFulfilled or onRejected) will be called asynchronously (scheduled in the job queue).
+
+            If a handler function:
+            1) RETURNS A VALUE (i:e return 1; return [1,2,3]; return {age: 18}):-
+            => the promise returned by dot .then() gets resolved with the returned value as its value.
+
+            2) DOESN'T RETURN ANYTHING:-
+            => the promise returned by then gets resolved with an undefined value.
+
+            3) THROWS AN ERROR:-
+            => the promise returned by then gets rejected with the thrown error as its value.
+
+            4) RETURNS AN ALREADY FULFILLED PROMISE:-
+            => the promise returned by then gets fulfilled with that promise's value as its value.
+
+            5) RETURNS AN ALREADY REJECTED PROMISE:-
+            => the promise returned by then gets rejected with that promise's value as its value.
+
+            6) RETURNS ANOTHER PENDING PROMISE OBJECT:-
+            => the resolution/rejection of the promise returned by then will be subsequent(means as the returned promise resolves right away the one returned by the dot then will also get resolve) and will resolve to the resolution/rejection of the promise returned by the handler. Also, the resolved value of the promise returned by then will be the same as the resolved value of the promise returned by the handler.
+
+
+function constructPromise(){
+    const myPromise = new Promise((resolve, reject)=>{
+        if(true)
+            resolve('I am executed Synchronously');
+        else
+            reject(new Error('promise status is rejected'));
+    });
+
+    return myPromise;
+}
+
+=> when the above function 'constructPromise' is called, it will all execute synchronously from top to bottom and at the end of the synchronous execution it will return to us a Promise Object, remember that the Promise object is properly constructed whenever the "new Promise()" is encountered; the function passed to it the constructor of the Promise() is executed all synchronously and the status plus the value of the "new Promise()" object is decided upfront and then at the end of the execution of the 'constructPromise' function a full fledged Promise instance is returned with a fully developed status and value which is ready to be consumed via the dot .then() method:
+
+let full_Fledged_Promise = constructPromise();
+
+now let us consume this promise:-
+
+full_Fledged_Promise.then(value=>{
+    console.log('THIS onFulfilled CALLBACK IS THE FUNCTION WHICH IS ACTUALLY EXECUTED ASYNCHRONOUSLY!!!! AND IS FULLY PRIVILEGED TO DO ANYTHING WITH THE VALUE ARGUMENT PASSED TO IT THAT CAME FROM THE PREVIOUS DOT .THEN() CALL ASYNCHRONOUSLY!!!');
+});
+
+////////////////////////////////////////////////////////////////
+FETCH API
+////////////////////////////////////////////////////////////////
+The fetch api is just a function: fetch();
+
+This fetch() function returns a Promise Object which you can then consume via the dot .then() method;
+NOTE THAT: The value of the Promise Object returned by the fetch() function is not the actual content that you are fetching but the value of the Promise object returned by the fetch() function is something called the "RESPONSE OBJECT", Which is basically an instance of a built-in class "Response"
+
+THE RESPONSE OBJECT: this is an instance of the Response class that holds information and details about an http response such as the status , target URL, status text and code etc ....;
+
+Now this response object has a method up its prototypal chain method call dot .json() , this method when used on the Response Object which itself is the value of the Promise Object returned by the fetch method, so we were saying that when this method is called on this Response object, this method returns another "Promise Object" which inside the value contains the actual content that we were hitting; and we further can consume this via another dot .then method;
+
+the dot .json() method parses the json data that we are fetching from a URL endpoint and transforms it into a JS object and then returns to us that object as a value inside a Promise Object so basically the dot .json() returns a Promise;
+
+
+syntax:
+
+fetch('folder/subfolder/file.json')
+.then((response)=>{
+    return respons.json();
+})
+.then((data)=>{
+    console.log(data);
+})
+.catch((err)=>{
+    return err;
+})
+
+//remember that the dot .then() and the dot .catch() method themselves returns a promise object which's status and value totally depends upon what is returned from inside of the onFulfilled or onReject function; [CASE SCENARIOS MENTIONED ABOVE >> SEARCH FOR "If a handler function:"]
+
+////////////////////////////////////////////////////////////////
+                    ASYNC AWAIT / ASYNC AWAITS
+////////////////////////////////////////////////////////////////
+syntactical sugar around promises;
+omits dot .then() and dot .catch() which were used in promises for asynchronous execution of functions (onFulfilled , onReject);
+
+Async and Await are two different things:
+
+            "async and await make promises easier to write"
+
+                    DIFFERENCE BETWEEN THESE KEYWORDS:
+
+/////////////////////////////////////////////////////////
+                            async
+(just a keyword to make a function eligible to have the use of await keyword inside it and make a function return a Promise object, just these two things)
+/////////////////////////////////////////////////////////
+
+An async function is a function declared with the async keyword, and the await keyword is permitted within them.
+async makes a function return a Promise Asynchronously at the end.
+An async function returns A Promise which will be resolved with the value returned by the async function, or rejected with an exception thrown from, or uncaught within, the async function.
+Async functions always return a promise object.
+
+If the return value of an async function is not explicitly a promise, it will be implicitly wrapped in a promise.
+
+REMEMBER THAT:
+            "an async function is a synchronous function just like other normal functions which upon invocation has all its statements and expressions inside the function body executed synchronously, all the async keyword is doing is that it is making a function to return a Promise Object at the end of the day and to allow a function have the use of the await keyword BUT THE MAGIC HAPPENS WITH THE USE OF THE await KEYWORD inside an async function. Due to the use of the await keyword, not all the expressions are executed synchronously inside an async function, the following example will clarify it:"
+
+async function abc(){
+    console.log('executed synchronously');
+    console.log('executed synchronously');
+    let x = await 2 + 2; //also executed synchronously
+    //abc() function execution context suspends from execution stack right after the above await expression is executed and all the expressions coming after it (uptil the next await expression) will be treated as an asynchronous chunk of code and is going to be pushed into the job queue right after the Promise object next to the await keyword gets resolved and therefore the value of the resolved promise object is also made available to this "later chunk".
+    console.log('part of the later chunk');
+    console.log('part of the later chunk');
+    let y = await 3 + 3; //part of the later chunk
+    //the above three expressions will be executed synchronously (though they as a whole will be executed asynchronously since they are part of the later chunk which was pushed into the job queue due to the await keyword encounter). Here right at the 3rd expression when once again an await expression is encountered again the process is repeated and the subsequent expressions once again will be treated as a another later chunk which is to be executed asynchronously
+
+    console.log('another later chunk');
+    console.log('another later chunk');
+
+    return 3; //remember the return statement from inside of an async function will always be wrapped inside an asynchronous anonymous function and is always going to be executed asynchronously no matter what (it is an exception)
+}
+                        ---------WHILE--------
+
+        //////////////////////////////////////////////////
+                             await
+            (A syntactical sugar to dot .then() method)
+        //////////////////////////////////////////////////
+
+The await keyword takes a function next to it that returns a Promise and returns the resolved value of that promise. The await keyword sorts of grabs/pulls the value from a resolved promise object and lets you utilize that value;
+
+Think of the await keyword as the dot .then() method that when called upon a resolved Promise object passes to the given onFulfilled or onReject callback the value of the resolved promise object;
+
+Think of the rest of the function body coming after an await expression as the body of the callback function passed to the dot .then() or the dot .catch() method which is also executed asynchronously while the value of the promise object is made available to the callback function's body by passing the value of the resolved promise to these callbacks as argument;
+
+SO FOLLOWING POINTS CAN BE CONCLUDED:
+        ==> await keyword does not return a promise
+        ==> await keyword rather works over a promise
+        ==> it waits for the promise next to it to get resolved
+        ==> it suspends the execution of your async function
+        ==> it makes rest of the function body wait until the promise next to it resolves
+        ==> it waits for for the promise resolution in background and doesn't stop your main program execution, and as soon as the promise resolves it pushes the rest of the function body as a later chunk into the job queue by making the value of the resolved promise available to this chunk
+        ==> it doesn't stop the global execution context from running;
+        ==> it only suspends the current execution context from the execution stack
+        ==> the rest of your function body that was suspended due to the await keyword will be put at the end of the job queue and will be executed as a later chunk
+        ==> the await keyword gives the "async function" (which as a matter of fact is a synchronous function) the ability to have Asynchronous chunks inside it;
+        ==> the code chunk between two consecutive await calls is an asynchronous chunk
+        ==> as soon as the promise next to an await keyword gets resolved, it grabs the value from the promise object and returns it so as to make it available to the rest of your function body
+        ==> Think of the rest of the function body coming after an await expression as the body of the callback function passed to the dot .then() or the dot .catch() method which is also executed asynchronously while the value of the promise object is made available to the callback function's body by passing the value of the resolved promise to these callbacks as argument;
+
+The await keyword can only be used inside an async function. The await statement operates on a Promise, waiting until the Promise resolves or rejects and uptil that it suspends the execution of the rest of the function body coming after it.
+
+The "async" and "await" keywords enable asynchronous plus promise-based behavior to be written in normal function style;
+
  */
 
 
