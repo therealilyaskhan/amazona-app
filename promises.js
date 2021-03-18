@@ -293,6 +293,8 @@ Async functions always return a promise object.
 If the return value of an async function is not explicitly a promise, it will be implicitly wrapped in a promise.
 
 REMEMBER THAT:
+            The body of an async function can be thought of as being split by zero or more await expressions. Top-level code, up to and including the first await expression (if there is one), is run synchronously. In this way, an async function without an await expression will run synchronously
+
             "an async function is a synchronous function just like other normal functions which upon invocation has all its statements and expressions inside the function body executed synchronously, all the async keyword is doing is that it is making a function to return a Promise Object at the end of the day and to allow a function have the use of the await keyword BUT THE MAGIC HAPPENS WITH THE USE OF THE await KEYWORD inside an async function. Due to the use of the await keyword, not all the expressions are executed synchronously inside an async function, the following example will clarify it:"
 
 async function abc(){
@@ -326,6 +328,7 @@ Think of the rest of the function body coming after an await expression as the b
 SO FOLLOWING POINTS CAN BE CONCLUDED:
         ==> await keyword does not return a promise
         ==> await keyword rather works over a promise
+        ==> If the value of the expression following the await operator is not a Promise , it's converted to a resolved Promise because at the end of the day the await operator only is applicable to Promises.
         ==> it waits for the promise next to it to get resolved
         ==> it suspends the execution of your async function
         ==> it makes rest of the function body wait until the promise next to it resolves
@@ -342,6 +345,12 @@ The await keyword can only be used inside an async function. The await statement
 
 The "async" and "await" keywords enable asynchronous plus promise-based behavior to be written in normal function style;
 
+TRY UNDERSTANDING THE FOLLOWING CODE:
+(async function blahh(){
+    console.log(await new Promise((resolve, reject)=>{resolve('3')}));
+})();
+
+it prints to the console 3; ignore what it returns (of course it returns a promise)
  */
 
 
