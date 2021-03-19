@@ -868,6 +868,17 @@ Solution:
 
          REMEMBER THAT:
                When we abort a data fetch() process, the fetch will throw an Error an the name of that Error is going to be: 'AbortError'
+
+////////////////////////////////////////////
+            ROUTE PARAMETERS
+////////////////////////////////////////////
+Parameterized Routes that your define are the ones which are capable of accepting dynamic argument(s)
+
+The changeable parts of such Routes are called "ROUTE PARAMETERS"
+
+It is like a variable inside a route;
+
+The component to which a Parameterized Route is directed, you can access the parameters from the route inside that component via a react hook called 'useParams()'
 */
 
 

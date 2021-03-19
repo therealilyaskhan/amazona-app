@@ -1,0 +1,229 @@
+Git is the Distributed Version Control System and the Github is an only host that provides you some cloud storage to store your repositories (your project folders) remotely;
+
+Terminologies:
+-Author:
+the person who creates a file; person who gives birth to a file;
+
+-committer: 
+the person who makes some changes in a file and commits that file to the repository;
+
+-REPOSITORY:
+collection of files kept together for version controlling and they are under track, the place where they are kept is called a repository, the repository contains the history of all the changes, the repository is a folder having suffix .git; the files inside the .git folder are managed by git; or say the files in the repository are managed by git WHILE the files in the working directory, git has nothing to do with them;
+The working directory encapsulates the repository and then you commit changes from working directory to repository;
+--------------------------
+|             _________  |
+|             |  .git  | |
+|  working    |  repo  | |
+|  directory  |________| |
+|                        |
+--------------------------
+
+-git init:
+This command converts your working directory into a git repository; and then Whenever you make changes to your working directory the git compares the repo with it and offers you to either commit or not;
+
+-THE HIDDEN .git FOLDER:
+this is the folder which contains the actual git repo;
+
+-THREE LOGICAL AREAS IN WHICH WE WORK WITH OUR FILES / THE THREE LOCAL STATES:
+1) Working directory / working tree: We add delete and edit files in the working directory; the local project folder is called working tree, the files inside your working directory may or may not be managed /tracked by the git; however git is aware of them;
+
+2) Staging Area (index) -- pre-commit holding are and is often referred to as the GIT INDEX; We make changes in the working tree, and git gives us full control over which changes from our working tree we want to put into the next commit via the staging area; suppose we made changes to 3 files but only want to commit changes from 2 files , we will add the two files to the staging area and once the staging area is ready we make commit, the file left out can be included in a future commit;
+
+3) commit -- Git Local repository (what ever you commit goes into the hidden .git folder and is added to the commit history), the git repository keeps record of all your commits and you can always reflect back to an earlier snapshot(commit) from the record that the git is building inside the repository;
+
+LAST STATE IN THE GIT WORKFLOW AND THIS STATE HAS TO DO WITH A REMOTE REPOSITORY HOSTED SOMEWHERE ELSE E:G ON GITHUB:
+4)Remote Repository (Github)
+
+-CHECKOUT:
+simply it means to retrieve or fetch a particular commit or some files from that commit which were recorded earlier in git repository to your local working directory / tree;
+The action os retrieving an earlier version of a file or files from one of the previous commits is called "checkout";
+
+Every commit is logged by git, .git will keep record of who took this particular snapshot and when;
+
+before committing anything to the git repo, you should always configure first your git username and email; via the command: 
+git config --global user.name "therealilyaskhan"
+git config --global user.email "therealilyaskhan@hotmail.com"
+
+And the command below shows you your git username and email;
+git config --list
+
+-SNAPSHOT: 
+means commit, Whenever you commit, you actually take a snapshot of the new modified file and thus git keeps on taking snapshots over time on each and every commit
+
+-COMMIT:
+As a verb: The action of storing a new snapshot of the project’s state in the Git history, by creating a new commit representing the current state of the index and advancing HEAD to point at the new commit.
+the entire history of a project is represented as a set of different commits.
+
+-HEAD:
+Simply means:- The current branch.
+
+-head:
+There is a difference between the two terms "HEAD" and the "head" are two different terms:-
+HEAD means: "current development branch" 
+while
+The most recent commit to a development branch is to what the "head" points to; branch head moves forward as additional development is done on the branch. changes done -> committed = "head" moves forward
+
+-head ref:
+synonyms for head;
+
+-Mirror a repository: 
+Means cloning a repository
+
+-bare repository:
+A bare repository is a folder / directory that has a .git extension, that folder itself is the repository But if this folder does not have a locally checked-out copy of any of the files under revision control then such a repository is called a bare repository;
+
+-remote repository:
+A repository which is used to track the same project but resides somewhere else. 
+
+-branch:
+A branch represents an independent line of development. You can think of them as a way to request a brand new working directory, staging area, and project history. New commits are recorded in the history for the current branch.  A single Git repository can track multiple branches. and in each branch you can have multiple commits (snapshots) over time; and the recent most commit in a branch is to what the head ref points to;
+
+-master branch:
+The default development branch. Whenever you create a Git repository, a branch named "master" is created, and becomes the active branch. In most cases, this contains the local development, though that is purely by convention and is not required.
+
+FILE STATUS LIFECYCLE:
+1) UNTRACKED: 
+-first you use "git init" to create a Bare Git repository out of your working folder; 
+-an empty repository (an empty .git) folder is created inside the folder which you want to create a git repo out of (means your working tree)
+-initially the status of files and folders inside your working tree will be UNTRACKED;
+
+2) UNMODIFIED but TRACKED:
+-the "git add" command is used to add a file or all file (--a) to the staging area BUT
+-When for the very first time you run the "git add" command the git is not going to take your files to the staging area instead it will start keeping track of your files now by generating a hash code out of the current source code; at this moment nothing is inside the staging area, the status of your files after the first "git add --a" is now changed to UNMODIFIED only;
+
+3) MODIFIED:
+-now if you make changes to any one of your files then the status of those specific changed file(s) will be changed from unmodified to MODIFIED and remember that nothing is inside the staging area since you only have executed the "git add" command only once so far;
+-now the changed / modified files are waiting to be staged;
+
+4) STAGED:
+-now all the subsequent "git add" commands will be used to stage files; if you type "git status" then the modified files will be shown to you, now it is your choice wether you want to only stage the files having MODIFIED status or along with them also take the files having UNMODIFIED status to the staging area;
+-Once you take the files of your choice from MODIFIED or UNMODIFIED status to the STAGING area; then these files are ready to be committed means they are ready to be taken a snapshot of;
+
+NOW INTERESTINGLY:
+-Suppose you have staged all of your files and now there is not a single file in your working tree having a status either MODIFIED or UNMODIFIED; Means all the files are having a status "STAGED";
+-Now at this point suppose you have two files in your working directory "file1.txt" and "file2.csv" and both the files are having a status "STAGED";
+-Now if you make any changes from your working tree to lets say the "file1.txt" , the status of this file is going to be changed from STAGED --> MODIFIED, 
+BUT
+-The original "file1.txt" still lives inside the staging area unmodified, and a modified version of it is created and is given a status as MODIFIED, you can simply put it this way: Whenever a staged file is modified, a replica of that file is created with the newer modifications and that file is given a status MODIFIED, the original file still lives under the staging area with the original unmodified content;
+So THE DIFFERENCE IS THAT: the ones to which you made changes are now NOT inside the staging area; their original version is still in the staging are but the changed version of them are just and only having a status "MODIFIED";
+-now to replace the unmodified version of the "file1.txt" living in the staging area with the modified "file1.txt" which is not in the staging area you simply have to RE-STAGE the "file1.txt" again by using: 
+                        git add file1.txt
+
+.gitignore file:
+A . gitignore file is a plain text file where each line contains a pattern [regular expression] for files or directories to ignore. Remember that Git ignores empty folders by default; it tells Git exactly which files to ignore and never track.
+Generally, this is placed in the root folder of the repository.
+
+REMEMBER THAT: The patterns in the files are relative to the location of that .gitignore file.
+
+'*' is used as a wildcard match that matches any character except slash fwd /. *.log will ignore any file with the .log extension;
+
+'#' will comment the line
+
+'/' will ignore directories with the specified name. You can ignore entire directories, just by including their paths and putting a / on the end. If you leave the slash off of the end, it will match both files and directories with that name. and '/' at the beginning represents the root directory means the folder where the .gitignore lives, so /dir/ will ignore only the folder (only folder since there is a slash at the end of the dir/) and since there is also one at the start so the "dir" folder living in the root will be ignored; but if it was just "dir/" then every single folder in your project named "dir" will be ignored by the Git;
+
+COMMANDS:
+
+git status:
+-compares the last commit's hash code with the current directory hash code and lets you know if some changes needs to be staged and committed;
+-displays the state of the working tree and the staging area; it -let's you see which changes in the working area have been staged and which aren't; it also lets you see which files in your working directory are not being tracked currently by the Git; 
+-lets you know about the current development branch by telling you where the HEAD points to;
+-also tell you which changes are currently staged and needs to be committed
+
+git add --a:
+put all the files currently in the working area into the staging area; 
+
+git add "fileName.extension": 
+lets you add file(s) to the staging area;
+
+git commit -m "you commit message":
+this lets you commit the changes staged into your local git repository
+
+git log:
+lets you see the history of all the commits with the latest on the top;
+
+git log -p: 
+lets you see all the commits and also against each commit provides you detailed description that what changes were committed;
+
+git log --stat:
+shows you all commits and with each commit the summary of the commit;
+
+git log -- pretty=full:
+shows you just commit history and with each commit a short description containing the commit message and the author information and the committer information, nothing more than that;
+
+rm -rf .git:
+removes the entire git repository (deletes the .git folder)
+
+git clone "url to the repository":
+used to download a remote repository into your local machine, this command downloads the entire source code to your local machine inside the folder in which you are running this command and inside that folder automatically creates a local Git repository for that source code;
+
+git diff:
+-When you make changes to any one of the staged files , a new modified version of that file is created with a status as "UNSTAGED" + "MODIFIED" and the original version of this file still remains in the staging area ready to be committed;
+=> "git diff" command compares the WORKING TREE with STAGING AREA;
+
+IF: staging area and the working directory both are same then the git diff will return "void" nothing;
+
+git diff --staged:
+Via this git diff command you can also compare your LAST COMMIT WITH STAGING AREA; means it is also used to compare both what is now in the commit with what is about to be committed and shows you the difference if there is any;
+
+git commit -a -m "Direct Commit and Bypassing Staging Area":
+this command is used to directly commit all the modified files from the Working Tree into the Repository; Remember it only takes the tracked files from the working tree into the repo and untracked and newly created files are not committed by this command;
+
+git rm filename.ext:
+this command is used to delete the specified file.ext from your working tree and stage the changes you made to your working tree automatically for you, then you just have to commit via git commit -m "removed filename.ext";
+
+git mv filename.ext filename_rename.ext:
+used to change the filename to the filename_rename in your working directory and also automatically stages these changes for you which you thereafter  just need to commit;
+
+git rm --cached filename.ext:
+when you add a particular file or folder to the .gitignore that was the track of the Git, you have to go and explicitly and manually tell Git via this command to stop tracking this file and therefore afterwards the .gitignore won't let the Git to track the file anymore and thus the file won't be shown to you as UNTRACKED anymore; 
+
+git restore --staged filename.ext:
+used to change the status of a STAGED file to UNSTAGED AND MODIFIED and move it from the staging area into the working area;
+
+git restore filename.ext:
+this command is used to discard local changes in a file, thereby restoring its last committed state from the git repository
+
+git checkout -- filename.ext:
+git checkout filename.ext:
+this command is used to reset a the specified file and restoring it to its last committed version. 
+IMPORTANT NOTE:
+   "git checkout" command is also used to switch between branches, and you could happen to have a file with the same name as a branch. To make sure that you are typing a filename and not a branch name:
+          The special "option" -- is used before the filename.ext;
+          This means: "treat every argument after this point as a file name, no matter what it looks like."
+          TO BE CLEAR:
+          rm -f      # does nothing
+          rm -- -f   # deletes a file named "-f"
+
+Remember that the git checkout -- filename.ext won't work for the files that are in the staging area and are not in the modified state; this command only works for the files having a modified status;
+
+git checkout -f:
+This command is used to restore the entire working tree (the changes you made inside it to different files) to the last commit and will match your current working tree to your last commit;
+
+git remote add <shortname> <url>:
+This command is used to add a remote handler to a repository hosted on a remote server such as the github server; you create a remote controller to a particular repository hosted on some repositories server and give this remote controller a name of your choice in this case "origin" is the name given to the remote and via the 'origin' remote we can push or pull and perform other operations over the remotely living repo if we have rights to do so...
+The "shortname" you provide can later be used instead of the URL when referencing the remote. A typical default shortname is "origin".
+
+-To add a new remote, use the git remote add command 
+-The git remote add command takes two arguments: 
+    1) A unique remote name, for example, “my_awesome_new_remote_repo”
+    2) A remote URL to the repo you want to have remote access to;
+
+git remote:
+The Git "remote" command helps you to manage connections to remote repositories. It allows you to show which remotes are currently connected by typing "git remote" command, but also to add new connections via "git remote add" command, or remove/break existing ones or rename an existing remote via the following commands:
+                  git remote rename <old remote name> <new remote name>
+                  git remote remove <remote name>
+
+git remote -v:
+By default, listing remote repositories via "git remote" command only shows you the shortnames (e.g. "origin") of the current remote connections; i:e list of all the remote repositories that your local repo is connected to;
+Using the "-v" option, you will also see the remote's URLs in listings.
+
+///////////////////////////////////
+            BRANCHING
+///////////////////////////////////
+
+
+
+
+
+
+
