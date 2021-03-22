@@ -9,7 +9,8 @@ const data = {
       brand: 'Nike',
       rating: 4.5,
       numReviews: 12,
-      description: 'A very good quality shirt!!!'
+      description: 'A very good quality shirt!!!',
+      countInStock: 10
     },
     {
       _id: '2',
@@ -20,7 +21,8 @@ const data = {
       brand: 'Adidas',
       rating: 4.0,
       numReviews: 8,
-      description: 'Good quality available in all sizes'
+      description: 'Good quality available in all sizes',
+      countInStock: 5
     },
     {
       _id: '3',
@@ -31,7 +33,8 @@ const data = {
       brand: 'Lacose',
       rating: 3.5,
       numReviews: 10,
-      description: 'A free size shirt'
+      description: 'A free size shirt',
+      countInStock: 1
     },
     {
       _id: '4',
@@ -42,7 +45,8 @@ const data = {
       brand: 'Nike',
       rating: 4.5,
       numReviews: 14,
-      description: 'A very good quality shirt!!!'
+      description: 'A very good quality shirt!!!',
+      countInStock: 0
     },
     {
       _id: '5',
@@ -53,7 +57,8 @@ const data = {
       brand: 'Puma',
       rating: 4.5,
       numReviews: 10,
-      description: 'High quality product'
+      description: 'High quality product',
+      countInStock: 22
     },
     {
       _id: '6',
@@ -64,7 +69,8 @@ const data = {
       brand: 'Adidas',
       rating: 5.0,
       numReviews: 25,
-      description: 'Best quality pants and shirt!!!'
+      description: 'Best quality pants and shirt!!!',
+      countInStock: 0
     }
   ]
 };

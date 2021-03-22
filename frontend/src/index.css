@@ -72,6 +72,36 @@ a:hover {
 img {
   border-radius: 0.5rem;
 }
+ul {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+li {
+  margin-top: 1rem;
+}
+button {
+  padding: 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  border: 1px #a4a4a4 solid;
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 1.6rem;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #f8f8f8;
+}
+button.primary {
+  background-color: #f0c040;
+  transition-delay: 0.05s;
+}
+button.primary:hover {
+  border: 1px #404040 solid;
+}
+button.block {
+  display: block;
+  min-width: 100%;
+}
 
 /* header */
 header a {
@@ -96,11 +126,25 @@ a.brand {
   justify-content: center;
 }
 
+.row.top {
+  align-items: flex-start;
+}
+
+.col-1 {
+  flex: 1 1 25rem;
+}
+
+.col-2 {
+  flex: 2 1 50rem;
+}
+
 img.medium {
   max-width: 29rem;
   width: 100%;
 }
-
+img.large {
+  width: 100%;
+}
 /* card */
 .card {
   border: 0.1rem #c0c0c0 solid;
@@ -127,4 +171,12 @@ img.medium {
 
 .rating span:last-child {
   color: #404040;
+}
+
+/* alert */
+.success {
+  color: #20a020;
+}
+.error {
+  color: #a02020;
 }
