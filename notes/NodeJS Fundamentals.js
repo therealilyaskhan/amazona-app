@@ -451,7 +451,7 @@ console.log('the app and router , both are same thing but app is just a default 
 
 /************************************************************
  ////////////////////////////////////////////////////////////
-              FIRST EXPRESS SERVER EXPLAINED
+              FIRST SERVER EXPLAINED
  ////////////////////////////////////////////////////////////
  ************************************************************/
 /*
@@ -646,4 +646,60 @@ STRUCTURING EXPRESS APP:
 ==> Then goto the myapp project folder the express project generator creates for you and run the following command to install the required dependencies and the devdependencies mentioned in the package.json:
                 npm install
 ==> now you may uninstall some of the packages that you don't want;
+
+/////////////////////////////////////////////////////////////
+DIFFERENCE BETWEEN res.send() , res.end() , res.json() , res.render() etc...
+/////////////////////////////////////////////////////////////
+res.end():-
+      this method comes from the node's core, when using this method while sending response to the client ; you have to write response headers by yourself such as the content type of the response etc and then the res.end() is only used to write the response body along with ending the response;
+
+ON THE OTHER HAND:
+
+res.send() , res.json() , res.render() all these methods are not part of the node's core, they belong to Express and while sending the response via one of these methods you don't have to write write headers by yourself, seeing the structure of your response body, these method from express will automatically set the headers for your response;
+
+Moreover, the res.json() , and the res.render() are methods which are specially implemented by express to send json data and html markup back as a response respectively; you don't have to convert js object by yourself into a json first and then stream it back , you just need to pass the js object to it and it will do all the work for you!
+
+///////////////////////////////////////////////////////////
+Proxying API Requests in Development
+///////////////////////////////////////////////////////////
+Proxying: giving or providing authority or power to act for another!
+
+ONLY DURING DEVELOPMENT:
+              "YOUR BACKEND AND FRONT END FOLDERS ARE HOSTED ON DIFFERENT SERVERS"
+              Normally during the development of your application both your front-end react application and the backend nodejs server are served on different sockets i:e different ports, so it won't be wrong saying that both of your project folders are served on entirely different machines and have no connection with one another; e:g:-
+              1) react application on localhost:3000 <machine1>
+              2) and nodejs server on localhost:5000 <machine2>
+
+      1)
+              Now your browser has the ability to automatically make http(s) requests when you access a particular URL, that's what your browser is trained for!!!
+
+              Now whenever you go to your react app root project folder and run cmd command npm start, the create-react-app tool creates a local server which listens to port 3000 and your react app is temporarily hosted/served by the create-react-app on this local server; now whenever you visit this URL:
+                    localhost:3000
+              The local server will serve you with the static files (index html, js bundles , css , images etc)
+
+      2)
+              And of course when creating a backend server via nodejs and express, you yourself make it to listen on a particular port on your local computer and put different files on your backend and direct different route via Routers to those files which upon request from the client side will return some data as a response;
+
+Now imagine a case scenario:
+              Your front-end application is hosted by the create react app on the local server that is listening to port 3000;
+
+              Now suppose one of your components is making a request for data fetch to the following URL:
+
+                      "/api/todos"
+
+              Now since the forward slash at the start means root so the url requested by the client side javascript (the react) is going to be:
+
+                    "localhost:3000/api/todos"
+
+              Now since during development, the backend files of lives in a different house than that of the front end files of your application, so it means that there is no such route on the server on which your front end application is hosted, so when the above request goes to the server on which your front end is hosted, (if you are not proxying it) the request is going to be a 404 one and the server is not going to recognize it because the files that are served via the port 3000 are not routing this route nowhere;
+
+      SOLUTION:
+              To tell the development server to proxy any unknown requests to your API server in development, add a proxy field to your package.json, for example:
+
+                "proxy": "http://localhost:4000",
+
+              This way: the development server port 3000 will recognize that it’s not a static asset and is an unknown request so it will go and check if any proxies are set, and will proxy your request to http://localhost:4000/api/todos as a fallback.
+
+              Keep in mind that proxy only has effect in development (with npm start), and in production this is not going to be the case, there is no proxying in production as your whole project is going to be served under the same umbrella; and proper routing would be done;
+
 */

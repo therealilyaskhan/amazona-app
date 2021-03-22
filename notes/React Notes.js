@@ -879,6 +879,66 @@ The changeable parts of such Routes are called "ROUTE PARAMETERS"
 It is like a variable inside a route;
 
 The component to which a Parameterized Route is directed, you can access the parameters from the route inside that component via a react hook called 'useParams()'
+
+//////////////////////////////////////////////
+INSTALLING AND RUNNING ESLINT AS A DEV DEPENDENCY:
+//////////////////////////////////////////////
+==> run in your project root folder:
+         npm install -D eslint
+==> then:
+         ./node_modules/.bin/eslint --init
+
+////////////////////////////////////////////
+         THE DOT .env FILE
+The .env File contains environment variables:
+////////////////////////////////////////////
+ON A QUICKER NOTE: after adding the .env file you need to restart your server in order to enable react to import all the enviroment variable's values form the .env file to your app's environment;
+
+The environment for your react app is: process.env this is where all the environment variables are attached to;
+
+REMEMBER THAT: every time you want to use environment variables in your react app, you should be really careful about naming such variables inside the .env file for your react project, because only those variables will be brought by react into the react environment from its .env file which follows a certain naming rule. and the naming rule is follows:
+
+            "REACT_APP_"  <== React's environment variables should be prefixed by REACT_APP_ otherwise they won't be imported into the react's envvironment out of the dot .env file that belongs to the react app;
+
+Environment variables are just like those variables that you set in windows after downloading python or node; e:g as sometimes when you download a piece of software and windows asks you after installation wether you would like to add it to environment variables; such that when these softwares would run in windows environment , the variables set in windows env are going to be readily available to these softwares;
+
+The .env file holds environment variables for the environment in which your app runs; so basically it simply holds env variables for your app;
+
+It’s actually a simple configuration text file that is used to define some variables you want to pass into your application’s environment;
+a simple text configuration file for controlling your Applications environment constants.
+
+.env files are line delimitated text files, meaning that each new line represents a single variable. By convention .env variable names are uppercase words separated by underscores. Variable names are followed directly by an = which, in turn is followed directly by the value, for example:
+
+syntax:- ENV_VARIABLE=VALUE
+and
+In the case of Node.js: process.env[ENV_VARIABLE]=VALUE.
+
+This file needs a something like a parser to make it work. The parser reads the variable definitions one-by-one and parses them to the environment.
+
+They are not just parsed out of the box , you need an npm package to be able to use environment variables in your app;
+
+it is interpreted by the npm dotenv package.
+
+Nearly every programming language has a package or library that can be used to read environment variables from the .env file
+
+Environment variables are one of the key ways software developers provide an application with sensitive information;
+
+not only environment variables but you can also set configurations inside this file;
+
+All your variables from this .env file are parsed by an npm package and During application initialization, these are loaded into the env property of the process object:- process.env. E:g then you would access them like follows:
+         process.env.REACT_APP_METEORITE_STRIKE_DATASET
+
+At runtime, the reference to the environment variable name is replaced with its current value.
+
+////////////////////////////////////////////////////////////////
+ADVANTAGE OF THIS FILE / WHY INFORMATION IS CONSIDERED SAFE IN THIS FILE ? WHY INFORMATION IN THE .ENV FILE IS CONSIDERED SAFE
+////////////////////////////////////////////////////////////////
+That's because there is not even a single place in the entire source code of your application where the value of these variables is evaluated!
+The value of these variables is set outside of your program/application.
+They lexically lives in your program but they can be seen nowhere in the program where they are derived from;
+BECAUSE:
+These variables are replace at runtime with the values they hold inside the .env file;
+
 */
 
 

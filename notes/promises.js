@@ -329,7 +329,8 @@ SO FOLLOWING POINTS CAN BE CONCLUDED:
         ==> await keyword does not return a promise
         ==> await keyword rather works over a promise
         ==> If the value of the expression following the await operator is not a Promise , it's converted to a resolved Promise because at the end of the day the await operator only is applicable to Promises.
-        ==> it waits for the promise next to it to get resolved
+        ==> whenever an await expression is executed, the function inside which this await was executed is suspended from the execution stack and the rest of the body of this function is scheduled and pushed at the end of the job queue for later execution;
+        ==> await keyword waits for the promise next to it to get resolved in background
         ==> it suspends the execution of your async function
         ==> it makes rest of the function body wait until the promise next to it resolves
         ==> it waits for for the promise resolution in background and doesn't stop your main program execution, and as soon as the promise resolves it pushes the rest of the function body as a later chunk into the job queue by making the value of the resolved promise available to this chunk
