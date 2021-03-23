@@ -939,7 +939,164 @@ They lexically lives in your program but they can be seen nowhere in the program
 BECAUSE:
 These variables are replace at runtime with the values they hold inside the .env file;
 
+
+////////////////////////////////////////////////////////////////
+         WHY WE DON'T USE *this* KEYWORD
+         WHEN USING FUNCTIONAL STATEFUL COMPONENTS ?
+         In a function component, we have no this. why ?
+////////////////////////////////////////////////////////////////
+When using functional stateful components, we don't use *this* keyword to control the state of our component that's because the setState function returned by the useState() hook holds a permanent reference to our state variable and therefore no matter where-ever this setState returned by the useState() is used to change the state variable , it will only change the very state to which it holds the reference unlike the classical components where you have to refer explicitly to the state of the current very component via the *this* keyword;
+
+Normally, variables “disappear” when the function exits but state variables initialized via the useState() hook are preserved by React and the function that holds reference to them setState() are also preserved even after the functional component constructor exits.
+
+What does useState return?
+It returns a pair of values: the current state and a function that updates it. This is why we write const [count, setCount] = useState(). This is similar to this.state.count and this.setState in a class;
+
+Docs says:
+      useState returns a pair: the current state value and a function that lets you update it. You can call this function from an event handler or somewhere else. It’s similar to this.setState in a class
 */
+
+
+/****************************************************************
+ ////////////////////////////////////////////////////////////////
+                              REDUX
+ ////////////////////////////////////////////////////////////////
+ ****************************************************************/
+/*
+What is a state ?
+At the end of the day state is what determines what a user should see on the screen!
+For example: a state "isUserAuthenticated" is going to decide what components a user should have access to and therefore what a user should see on the screen!
+
+Why need REDUX?
+React library itself is very great at reacting to change in a state and updating the UI accordingly BUT MANAGING THE STATE can become very difficult especially when the number of components and therefore the associated number of states grows; Therefore as your application grows it can become very difficult to pass states around from one component to another such that to avoid duplicate states; also keeping states for two components in sync is not preferred rather lifting the state up is preferred over that; so things can becomes complicated; REDUX TO RESCUE!!!
+
+WHY WE CAN'T USE A GLOBAL OBJECT TO STORE ALL OUR APP STATES ?
+That's because if we do so and we make changes to that object inside of some event handler then react is not going to react to these changes, for example:
+
+const globalState = {
+   name: 'ilyas'
+}
+
+const FunctionalComponent = () => {
+   const [name, setName] = useState(globalState.name);
+
+   const handler = () => globalState.name = 'khan';
+
+   return (
+      <div onClick={handler}>
+       {name}
+      </div>
+   );
+}
+
+upon clicking the div on the UI , the value of the name property inside the globalState object will change, now the our component internal state also held the same value as that of the name inside the globalState object but it only held it as a value not as a reference so it means that react won't react no matter how much we change the globalState object; so it means that we can't store our app state in a centralized object;
+
+NOW: Redux also implements the same idea but it is implemented in such a way that it makes react to be reactive to a central state holder;
+
+In each Redux applicaton we have a central storage that stores the entire application state;
+
+Components interact with this central javascript object that redux offers BUT NOT DIRECTLY; Doing so the react's reactivity won't work;
+
+There is a certain process that each component has to follow in order to utilize or manipulate the states stored inside the global states storage;
+
+Your component is going to dispatch an ACTION that it wants to perform; think of the ACTION as a parcel/ a package / a box, that holds some information such as the type of action and payload (data need by the action which you are going to perform to the state in the redux); So in short ACTION is an information parcel that you are delivering to Redux
+
+NOW this information package is not going directly to the store: rather it goes to something called "REDUCER" because it doesn't include the instruction on how to change the store , it just holds information on what to do, it is unaware of the "how" part;
+
+The reducer a pure javascript function that is directly connected to the store; This reducer function accepts the information package, it opens it and based upon the information inside this package it makes changes to the storage;
+
+Inside the reducer function you listen to different type of actions;
+
+The reducer holds different pieces of code where each particular piece of code is going to be run by the reducer based upon the type of ACTION; so inside the reducer different action are routed to different pieces of codes;
+
+The reducer spits out the updated state based upon the old state and the type of action and this updated state is stored in the store replacing the old state in the storage;
+
+Now how is a component going to get back the updated state from the storage again ?
+Via a mechanism called: 'SUBSCRIPTION MODEL'
+
+Whenever a change is made to the states inside the storage: the store is going to trigger all the subscriptions
+
+Now our components are going to subscribe to store updates, so the components will receive these updates automatically when the subscriptions are triggered; so each subscribing component will be like hey store i want to be notified whenever the state in the store changes;
+
+SO IN SHORT FOR A COMPONENT TO:-
+1) MAKE CHANGES TO THE STORE: component is going to submit a request like hey i want to change this particular state in the store;
+2) GET A PARTICULAR STATE FROM THE STORE: component should subscribe to store changes like hey i want to be notified about any changes in the store
+
+REMEMBER:
+      You can't make changes to your application's current state inside the reducer function, you must return the updated state from the reducer function and the state in the store will be updated accordingly;
+
+      What does that mean ? 
+      This means that each time a component based upon some user action dispatches an action to the reducer function via the store.dispatch() method, the reducer function is going to receive the (state, action) where the state is the current state of the application and the action is the action object; So inside your reducer function now state refers to the current state of your application BUT YOU ARE NOT allowed to make changes to it directly inside the reducer function based upon the information you have inside the action object; rather what you should do is that create a fresh new object and inside this new object copy the current state of your application via the spread ... operator and then override the properties of your application's state with updated values; and return this new fresh updated object (which is not the state of your application) from the reducer function and the state inside your store which is the current state of your react app will be automatically compared and matched against this new object returned from the reducer function and hence will be updated!!!
+
+REDUX offers a central state storage for your application;
+
+You can think of a Redux as a giant javascript object that stores the state of your entire application;
+
+Redux is a standalone third party state management library for react applications;
+
+Central storage for the data needed by your application! central state for the components in your app; Each component can go and collect the data that it needs from the Redux; Redux passes the data to a component in form of props;
+
+It is only the Reducer which is allowed to change the  (central data store)
+
+*/
+//A very basic redux workflow that we can integrate into a react app:
+const redux = require('redux');
+
+const initialState = {
+   counter: 0
+};
+
+// SETTING UP REDUCER
+const rootReducer = (state = initialState, action) => {
+   //here we will listen to different action types
+   //the reducer function returns the updated state as a new fresh object without mutating the original state (which is inside the first arg)
+   if (action.type === 'INT_COUNTER') {
+      return {
+         ...state,
+         counter: state.counter + 1
+      };
+   }
+   if (action.type === 'ADD_COUNTER') {
+      return {
+         ...state,
+         counter: state.counter + action.payload.value
+      };
+   }
+   //if none of the above condition matches the current state is going to be returned
+   return state;
+};
+
+// CREATING STORE
+//the createStore is a redux method that allows us to create a new redux store for storing the entire state of our app:-
+const createStore = redux.createStore;
+//a redux store is initialized via a reducer means the initial state of the store is decided by the reducer function that's why we pass the reducer to the store creator (the createStore store constructor); And also know that, the redux store is tightly in contact with the reducer and it is only the reducer that each time decides what the current situation of the store is going to be; 
+const store = createStore(rootReducer);
+//now your store is created with the state returned by the reducer inside it so:
+console.log(store.getState()); //OUTPUTS: {counter:0} 
+
+// SUBSCRIPTION TO STORE
+// subscription to store makes sure that we only call the store.getState() to get the snapshot of the current state when a change is made to the store; so subscription helps us to getState() from the store only when we are sure that a change has been made to the store and we should now take snapshot of the new state in the store:
+store.subscribe(() => {
+   //the store's subscribe method takes a callback which is going to be executed always whenever the store is updated.
+   //so this callback is sort of sitting in the listerner's environment and is listening for the store change event
+});
+
+
+// DISPATCHING ACTION
+// the argument to the dispatch function is what we call action this is what is dispatched to the reducer, this action must be an object with a "must-have" property named "type" and the value of this type key should be in upper case by convention and there will be a listener associated with each action type you dispatch to the reducer function;
+//the dispatch method is going to pass this action object as second argument to your rootReducer function and as first argument the current state of your application;
+store.dispatch({ type: 'INC_COUNTER' });
+store.dispatch({ type: 'ADD_COUNTER', payload: { value: 10 } });
+
+/****************************************************
+ ////////////////////////////////////////////////////
+         CONNECTION REACT TO REDUX
+   INTEGRATING REDUX INTO REACT APPLICATION
+ ////////////////////////////////////////////////////
+ ****************************************************/
+
+
+
 
 
 
