@@ -954,7 +954,75 @@ It returns a pair of values: the current state and a function that updates it. T
 
 Docs says:
       useState returns a pair: the current state value and a function that lets you update it. You can call this function from an event handler or somewhere else. It’s similar to this.setState in a class
+      
+      
+///////////////////////////////////////////////////
+            PROGRAMATIC REDIRECTS
+///////////////////////////////////////////////////
+Note that when using the component prop to render a route as follows:
+         <Route path="/" component={Home} />
+
+Then we have certain information automatically passed to the props object of the functional component which we can utilize there then such as: the match, location and history route props are implicitly passed to the component.
+
+REMEMBER: this extra information will be passed to only those functional components which are rendered by the <Route /> component!
+
+BUT
+
+We can also add these extra information or say explicitly pass these extra information to the props object of a functional component that is not rendered by the <Route /> , we can achieve this via HIGHER ORDER COMPONENTS (discussed below). We will wrap such a component which is not rendered by the <Route /> inside a higher order component offered by the react-router-dom package called "withRouter". and this higher order component will empower the component we wrapped inside it i:e the component we pass to it as argument by explicitly attaching to it's props property extra routing information; The higher order component is a function that takes in a component as arg, loads that component with extra powers and returns the resultant super-charged component;
+
+NOW LET'S COME TO OUR QUESTION HOW TO DO PROGRAMMATIC REDIRECTS ?
+Now there is a "history" property passed to the prop object of the functional component and the "history" property itself holds an object which further has a method by the name: "push", we can use this method "push" to push a route to this history which means that the history is like a stack which keeps track of all the routes we have visited so far with the current path on the top of the history stack so pushing a new URL to the top of the history stack will cause react to take us to the new url that's on the top of the history stack hence we will be redirected to that path/URL;
+
+////////////////////////////////////////////////////////////
+                  HIGHER ORDER COMPONENTS
+   Adds extra features and functionality to react components
+////////////////////////////////////////////////////////////
+==> Higher order components are functions whose mere purpose of existence is to wrap some other component i:e take other other react components as argument and give it extra powers and return the super-charged component;
+so:
+
+Component --- given to ---> HOC --- gives out ---> Supercharged Component
+
+RETURN VALUE:
+         The higher order component returns the original react element with some extra features loaded;
+
+<DOCS SAYS>:
+      Concretely, a higher-order component is a function that takes a component and returns a new component by applying some logic to it.
+
+const EnhancedComponent = higherOrderComponent(WrappedComponent);
+
+ a higher-order component transforms a component into another component. a higher order component doesn't return JSX or react elements rather it returns a transformed component;
+
+ THE CORE PURPOSE OF HIGHER ORDER COMPONENTS:
+            "is to define an abstraction that allows us to put a particular logic in a single place and share it across many components. such that whenever we pass a component (no matter what the component is) to this abstraction it applies the abstracted logic and returns us the tinkered component"
+
+Note that a HOC doesn’t modify the input component, nor does it use inheritance to copy its behavior. Rather, a HOC supercharges the original component by wrapping it in a container component.
+
+</DOCS SAYS>
+
+Example of a higher order component:-
+below the Rainbow is a higher order component that accepts any component or at the end of the day a react element as argument and returns that component along with some tinkers e:g the below HOC is wrapping the WrappedComponent inside a div and adding a random className to that div in order to change the color of the content inside this element to a random color;
 */
+import React from 'react';
+
+const Rainbow = (WrappedComponent) => {
+
+   const colours = ['red', 'pink', 'orange', 'blue', 'green', 'yellow'];
+   const randomColour = colours[Math.floor(Math.random() * 6)];
+   const className = randomColour + '-text';
+
+   return (props) => (
+      <div className={className}>
+         <WrappedComponent {...props} />
+      </div>
+   );
+
+};
+
+export default Rainbow;
+/* 
+
+*/
+
 
 
 /****************************************************************
@@ -963,6 +1031,9 @@ Docs says:
  ////////////////////////////////////////////////////////////////
  ****************************************************************/
 /*
+REASON REDUX WAS MADE:
+            For separation of concerns. Ideally, we keep anything that has to do with data manipulation and state management outside of the component;
+
 What is a state ?
 At the end of the day state is what determines what a user should see on the screen!
 For example: a state "isUserAuthenticated" is going to decide what components a user should have access to and therefore what a user should see on the screen!
@@ -1094,7 +1165,170 @@ store.dispatch({ type: 'ADD_COUNTER', payload: { value: 10 } });
    INTEGRATING REDUX INTO REACT APPLICATION
  ////////////////////////////////////////////////////
  ****************************************************/
+/*
+To connect redux to react or vice versa you need an npm package called : npm install react-redux --save
 
+this package offers you some different components and higher order components that wraps your normal react components and supercharges them with some extra superpowers such as then:
+--> all your components have access to redux store
+
+1) <Provide store={yourReduxStore}>
+Provides your react application with the redux store
+
+The <Provider> component makes the Redux store available to any nested components that need to access the Redux store.
+
+Any descendent component of the <Provider> component is capable of subscribing to certain states inside the store via the connect() function which connects a React component to a Redux store.
+
+Since all React component in a React Redux app will need to be connected to the store, therefore applications normally will wrap the entire app’s component tree inside of it.
+
+IT TAKES AS PROPERTY: the store (Redux Store) The single Redux store in your application.
+
+2) connect():
+   TLDR: provides its connected component with the pieces of the data it needs from the store, and the functions it can use to dispatch actions to the store.
+
+   SUBSCRIBING MEANS: to take pieces of states from the store and map those pieces of states as properties inside a component;
+
+   The connect() function connects a React component to a Redux store.
+
+   The connect() function itself is just a function, what it returns is a TAILORED HIGHER ORDER COMPONENT
+
+   To the connect() function we pass some configuration for the component which we want to subscribe to the store, and based upon the configuration we pass to the connect() function a Tailored higher order component is going to be returned which will supercharge our component;
+
+   We pass two pieces of information to the connect() function for a component:
+   1) THE STATE(S) WE WANT TO GET AS PROPS: we get slices of states from the store as props that a given component is going to manipulate
+   2) THE ACTIONS WE WANT TO DISPATCH:  the actions that we would like to dispatch in future from this component
+
+////////////////////////////////////////////////////////////
+1) GETTING SLICES OF STATES FROM THE REDUX STORE AS PROPS:
+////////////////////////////////////////////////////////////
+   REMEMBER:
+            The state that you want to access from the redux store into a component is not going to be imported inside of the component by reference because you can't make changes to the store directly from inside of a component rather whatever state(s) you are requesting / subscribing from the store will be passed to your component as properties just like if a parent component would pass state as properties to its child component;
+
+            SO IN SHORT: the state managed by redux will not be recevied to any of the components as state, rather states from redux will be transferred to components as props
+
+            Those time are over now when you would change and manage the state from inside of a component; now redux has taken over the whole state management stuff and redux is the place where state of your entire app is going to be managed and will be passed to a requesting component as property;
+
+   Whatever state(s) you want to import from the redux store as props inside a component, you make a list of them inside a javascript object, return that javascript object from inside of a callback function and pass this callback function to the connect() function, and those states from the redux store will be passed to your component as props by the higher order component returned by the connect() function;
+
+   The connect(callback) function accepts a callback, the connect function after performing all its operations, will execute this callback function and will pass to it the current state inside the redux store;
+
+   The function passed to the connect() api which is going to return the list of stateToProps that you want to access from the store is name as "mapStateToProps" by convention as follows:
+
+   const mapStateToProps = ReduxState => {
+      return {
+         toComponentProp: fromReduxState.prop
+      }
+   }
+
+   the function is named "mapStateToProps" because the object that it returns is just a mapping of "prop names" to "states in redux"; the states that you map to props, these states will be available inside your component inside the props object with the same name;
+
+   e:g if for a component you say inside the callback:
+
+   return {
+      fName: state.firstName
+   }
+
+   then the higher order function returned by the connect() function, will pass the state "firstName" from the redux store to the component as "props.fName"
+
+   The HOC returned by this connect() api is tailored according to the arguments passed to this connect() function and:
+
+   Then that HOC takes in as argument a react component which you want to connect to the store
+
+   That HOC provides the wrapped component with the pieces or slices of the data it had requested from the store as props, and the functions it can use to dispatch actions to the store.
+
+/////////////////////////////////////////////////////////////
+2) DISPATCHING ACTIONS FROM INSIDE OF THE COMPONENTS CONNECTED TO THE STORE:
+/////////////////////////////////////////////////////////////
+REMEMBER THAT: you never have a direct access to the redux store from inside of your component so you can't just dispatch actions from inside of your components directly via the dispatch method on the store interface cuz you have no direct access to the store interface and thus the dispatch method from inside of your components, because it is only the dispatch method on the store interface via which you can dispatch actions from inside of a component upon a certain event occurance as follows:
+
+store.dispatch({ type: 'ADD_COUNTER', payload: { value: 10 } });
+
+BUT since you have no direct access to the redux store from a component so just like:-
+            You subscribed to the store and got certain slices of states from the store in step 1 above via the connect function ; and that connect function was sort of middle man between your component and the store;
+****************
+IMPORTANT POINT:
+****************
+IT IS THE HIGHER ORDER COMPONENT THAT PASSES TO YOUR COMPONENT AS PROPERTIES SLICES OF STATE FROM THE REDUX STORE SO SOMEHOW WE SHOULD CONFIGURE OUR CONNECT METHOD IN SUCH A WAY THAT THE HIGHER ORDER COMPONENT IT RETURNS ALSO PASS AS A PROPERTY A DISPATCH FUNCTION TO OUR COMPONENT;
+****************
+****************
+So how do we get access to the dispatch method from inside of a component then so that we can dispatch some actions to the reducer and then change a particular slice of the state in the redux store based upon a particular action type ?
+THE ANSWER IS: once again you are going to use the connect() interface and THIS TIME WE SHOULD CONFIGURE OUR CONNECT METHOD IN SUCH A WAY THAT THE HIGHER ORDER COMPONENT IT RETURNS ALSO PASS AS A PROPERTY A DISPATCH FUNCTION TO OUR COMPONENT; so what we will do is that we will pass it as a second argument, a configuration callback named "mapDispatchToProps"; the connect() function will invoke this callback function and will pass to it as argument a dispatch function definition which is going to enable us to dispatch certain types of actions from inside of a component to the reducer connected to the store upon execution:
+
+So now we will have this store.dispatch function's definition available to us inside the callback we had passed to the connect() method, so we will take advantage of this fact, and will return from the callback a javascript object inside which we will map different anonymous functions to different props which upon execution will dispatch certain types of actions to the reducer function as follows:
+
+//REMEMBER THAT: the properties of the object being returned by the callback below will be attached by the HOC returned by the connect() as props to our component so we will just then have to invoke these properties upon a certain event an the associated function will be invoked which will dispatch a certain type of action for us via the dispatch method that originally comes from the store interface;
+
+const mapDispatchToProps = dispatch => {
+   return {
+      onIncrementCounter: () => dispatch({type: 'INC_COUNTER'})
+   }
+}
+
+so now we have both things in place:
+1) LIST OF SLICES WE WANT TO GET AS PROPS INSIDE OUR COMPONENT FROM THE REDUX STORE
+2) LIST OF ACTIONS WE WOULD LIKE TO DISPATCH FROM A COMPONENT
+
+both as callback functions:
+1) mapStateToProps
+2) mapDispatchToProps
+
+so we can say:
+
+connect(mapStateToProps, mapDispatchToProps)(Component);
+
+AND WITH THE ABOVE CONNECT EXPRESSION OUR COMPONENT: is going to have access to certain states from the redux store as props, and certain dispatchers which will be able to dispatch to the reducer certain types of actions;
+
+/////////////////////////////////////////////////////////
+YOU SHOULD UPDATE THE STATE INSIDE THE REDUCER IMMUTABLY
+/////////////////////////////////////////////////////////
+let's say your current redux store state is:
+            reduxState =   {
+                              counter: 0,
+                              results: [33]
+                           }
+Now inside your reducer you should NOT update your state the following way:
+      1)   const newState = Object.assign({} , reduxState);
+      2)   newState.results.push(44);
+THE ABOVE METHOD OF UPDATING THE STATE IS INCORRECT; that's because no doubt we are cloning / copying the reduxState object and storing that clone of the reduxState inside the newState BUT we are only making a new copy of the mere object itself. The properties inside it are still memory locations. and if the properties inside this object will be of premitive type then they will be also be cloned and copied by value since premitives are never copied by reference but if the properties inside an object are also objects such as object literals or arrays, then they will not be cloned/copied BUT rather the new copy of the object will still hold references to the same memory locations for all the objects and arrays that are inside the reduxState object since arrays and  objects are always copied by reference;
+
+so we should rather change it the following way:
+      1)   const newState = Object.assign({} , reduxState);
+      2)   newState.results.concat(44);
+
+      or
+
+      return a new object from inside of the reducer like so:
+
+      return {
+         ...reduxState,
+         results: reduxState.results.concat(44)
+      }
+
+/////////////////////////////////////////////////////////////
+                  ASYNC CODE WITH REDUX
+/////////////////////////////////////////////////////////////
+Let's say we want to update one of the states in the redux store with data from a database upon a user event such as "scroll" or click etc;
+
+How are going to do that ? Where exactly in our application shall we put the fetch call to database so that our redux store updates successfully with that data ?
+
+1) DATA FETCH CALL INSIDE THE COMPONENT ITSELF:
+   AT COMPONENT:
+         No! we could hook on the fetch call to the componentDidMount lifecycle method via the useEffect hook inside the component and then upon the data arrival from the database we could simply dispatch an action from the component along with the data received as payload to the reducer and update a state inside the redux store this way, which is feasible BUT we won't do so just because then we won't have separation of concerns.  Ideally, we keep anything that has to do with data manipulation and state management outside of the component; We don't retrieve data into a component directly from the database from inside of a component rather any data that a component needs must be requested from the redux store as props (mapStateToProps);
+
+2) DATA FETCH CALL INSIDE THE ROOT REDUCER:
+   AT REDUCER:
+         NO! since we know that the reducer functions are executed synchronously while the fetch call are asynchronous, so it means that putting a fetch call inside reducer won't pause the reducer's execution and thus the reducer won't wait for the data to be retrived from the database and thus by the time fetch call returns data from the database, reducer would have already returned the current state to the reducer store thus as a result making no updates to the store state;
+         So can't put fetch calls inside a reducer too;
+
+So we can't put fetch calls inside a reducer and also not inside a component;
+THEN WHERE ?
+we are only left with one place that's the dispatcher function that anonymous function which dispatches action type and payloads for us;
+
+Now we can't just put a fetch call inside a dispatcher function and populate our payload on the fly with the data returned by fetch call inside our dispatcher function; because the dispatcher function will then let the fetch call grab the data asynchronously while moving itself synchronously towards the dispatcher by passing it an undefined payload;
+
+So somehow we have to intercept our dispatcher from dispatching the Action to the reducer directly because as soon as the Action reaches the reducer the reducer runs synchronously and returns the state and doesn't wait for any fetch call;
+
+So we have to break the direct connection between the dispatcher function and the reducer function and insert in between them some middleware that keeps the Action on hold and make it wait until its payload is filled with the data fetched asynchronously from the database; and right after the Action is ready to be dispatched to the reducer the middleware then releases it to go there;
+*/
 
 
 

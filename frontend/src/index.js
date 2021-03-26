@@ -7,11 +7,15 @@ import './index.css';
 //remember in a react application it is only one single ReactDOM.render() call at the end of the day that is going to mount a single react functional component called App on a 'root' container inside the html markup file; and from inside of that function react component called "App" we are going to refer to all other different components as its children;
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { Provider } from 'react-redux';
+import store from './store';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
+  <Provider store={store}>
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  </Provider>,
   document.getElementById('root')
 );
 
