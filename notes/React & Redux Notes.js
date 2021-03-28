@@ -1031,6 +1031,13 @@ export default Rainbow;
  ////////////////////////////////////////////////////////////////
  ****************************************************************/
 /*
+KEYPOINTS:
+1) A redux store is nothing but a javascript object that represents the global state of our application
+
+2) Nothing has the right to make changes to the store (the object) except reducer(s)
+
+2) whenever an "Action Object" is dispatched it goes to the reducer directly; But remember!!! just Action object not some function call to an action creator that returns a thunk;
+
 REASON REDUX WAS MADE:
             For separation of concerns. Ideally, we keep anything that has to do with data manipulation and state management outside of the component;
 
@@ -1138,6 +1145,7 @@ const rootReducer = (state = initialState, action) => {
 };
 
 // CREATING STORE
+//A redux store is nothing but a javascript object that represents the global state of our application
 //the createStore is a redux method that allows us to create a new redux store for storing the entire state of our app:-
 const createStore = redux.createStore;
 //a redux store is initialized via a reducer means the initial state of the store is decided by the reducer function that's why we pass the reducer to the store creator (the createStore store constructor); And also know that, the redux store is tightly in contact with the reducer and it is only the reducer that each time decides what the current situation of the store is going to be; 
@@ -1303,9 +1311,93 @@ so we should rather change it the following way:
          results: reduxState.results.concat(44)
       }
 
+//////////////////////////////////////////////////////////
+                     ACTION CREATORS
+//////////////////////////////////////////////////////////
+BACKGROUND:-
+We pass to the connect() method two callbacks:
+1) mapStateToProps
+2) mapDispatchToProps
+From these callback functions we return anonymous object inside which we map state from the store as props in  the component (prop <= state) and Actions via dispatch method as props in the component (prop <= dispatcher). The connect() function executes and returns a higher order component which pass these mappings in the objects we return from the above two callback function as props to our components;
+
+NOW LET'S TALK ABOUT THE SECOND CALLBACK WE PASS TO CONNECT():
+2) mapDispatchToProps
+It is something as follows:
+
+const mapDispatchToProps  = (dispatch) => {
+   return {
+      onIncCounter: () => {
+         dispatch({type: 'INC_COUNTER'})
+      }
+   }
+}
+
+NOW WHAT IS THE ACTION IN THE ABOVE CALLBACK ?
+///////////
+  ACTION
+///////////
+Action in the above code is this tiny object right here:
+{type: 'INC_COUNTER'}
+
+And the onIncCounter() method is what we refer to as the dispatcher, the dispatcher dispatches our action object {type: 'INC_COUNTER'} via the store.dispatch method;
+
+And the mapDispatchToProps as a whole is the callback function which is passed to the connect() function;
+
+NOW WHAT ARE ***ACTION CREATORS*** ?
+=> as we can see above that we are creating the Action right where we dispatch them i:e directly inside the dispatch method as argument to the dispatch method on the fly; so we we need an action creator to achieve A) SEPARATION OF CONCERNS B) PRODUCE REUSABLE ACTION;
+
+////////////////////
+ACTION CREATORS
+///////////////////
+They are just functions! they are action generator functions; So instead of creating an action on the fly as an argument to the store.dispatch() function, we rather call our action creator function in place where we pass action to the dispatch function and they will generate action and return the action which will be dispatch to the reducer;
+
+The action creators or say generators helps us with asynchronous code;
+
+So the above Dispatcher function can be rewritten as follows:
+
+const incCounter = () => {
+   return {
+      type: 'INC_COUNTER'
+   }
+}
+
+const mapDispatchToProps  = (dispatch) => {
+   return {
+      onIncCounter: () => {
+         dispatch(incCounter())
+      }
+   }
+}
+
+
+
 /////////////////////////////////////////////////////////////
-                  ASYNC CODE WITH REDUX
+            ASYNC CODE WITH REDUX  /  redux-thunk npm package
 /////////////////////////////////////////////////////////////
+FIRST OFF:
+      A common misconception is that with Redux you can’t dispatch actions from within async calls i:e you can't call the store.dispatch({type: blah}) from inside of the callback to a dot .then() method or after the await expression inside an async function; In fact, It’s technically possible, just not recommended.
+
+So without the thunk middleware your bare action creator is also capable of intercepting the dispatcher from dispatching action to the reducer directly as follows:
+
+without any middleware, your action creator might look like
+
+// action creator
+function loadData(dispatch, userId) {
+  return fetch(`http://data.com/${userId}`)
+    .then(res => res.json())
+    .then(
+      data => dispatch({ type: 'LOAD_DATA_SUCCESS', data }),
+      err => dispatch({ type: 'LOAD_DATA_FAILURE', err })
+    );
+}
+
+THEN WHY NEED THUNK ? THEN WHY USE THUNK ?
+Well, The action creator function itself is preferred to remain a pure function, but the thunk function it returns doesn't need to be, and it can do our async calls; so it means that all the redux-thunk is doing is that it is allowing you to have a function returned from the action creator function instead of an action object;
+
+now let's understand some prerequisites first in order to understand async operations with redux via thunk:
+
+ACTION CREATOR:
+
 Let's say we want to update one of the states in the redux store with data from a database upon a user event such as "scroll" or click etc;
 
 How are going to do that ? Where exactly in our application shall we put the fetch call to database so that our redux store updates successfully with that data ?
@@ -1321,13 +1413,142 @@ How are going to do that ? Where exactly in our application shall we put the fet
 
 So we can't put fetch calls inside a reducer and also not inside a component;
 THEN WHERE ?
-we are only left with one place that's the dispatcher function that anonymous function which dispatches action type and payloads for us;
+we are only left with one option. Since as soon as our Action reaches the reducer the reducer is no going to wait for anything and will return the state object from within itself, and we don't want to fetch data inside of a component; SO: what if we somehow manage to send the reducer a full fledged Action i:e with the action type and the complete payload data that needs to be injected into the store; Since when we dispatch action from our component the action goes directly from the dispatcher to the reducer, but what if we somehow manage to not let the action go rightaway from the dispatcher to the reducer but we sort of inject a middleware in between them and transform our Action and thereafter depart the transformed Action to the reducer function;
 
-Now we can't just put a fetch call inside a dispatcher function and populate our payload on the fly with the data returned by fetch call inside our dispatcher function; because the dispatcher function will then let the fetch call grab the data asynchronously while moving itself synchronously towards the dispatcher by passing it an undefined payload;
+Now we can't just put a fetch call inside a dispatcher function and populate our payload on the fly inside our Action object with the data returned by fetch call; because as soon as the Action object is dispatched by the dispatcher via the dispatch method, the dispatch method is going to dispatch the action object to the reducer not even waiting for our async data fetch call from the action object to be completed and therefore if we do so the Action object will have its payload property passed as undefined to the reducer;
 
 So somehow we have to intercept our dispatcher from dispatching the Action to the reducer directly because as soon as the Action reaches the reducer the reducer runs synchronously and returns the state and doesn't wait for any fetch call;
 
-So we have to break the direct connection between the dispatcher function and the reducer function and insert in between them some middleware that keeps the Action on hold and make it wait until its payload is filled with the data fetched asynchronously from the database; and right after the Action is ready to be dispatched to the reducer the middleware then releases it to go there;
+So we have to break the direct connection between the dispatcher function and the reducer function and insert in between them some middleware that keeps the dispatcher function from sending the Action object directly to the reducer and keep this process on hold and until the payload of the Action object is filled with the data fetched asynchronously from the database; and right after the Action is ready to be dispatched to the reducer the middleware then releases it to go there;
+
+////////////////////////////////////////////////
+redux redux-thunk / redux-thunk to rescue
+///////////////////////////////////////////////
+TLDR: all a redux-thunk is a middleware that when you apply to your redux store, it then allows you to return a function from your action creators instead of action object i:e if we put it the other way: BASICALLY IT SUPERCHARGES THE DISPATCH METHOD ON THE STORE INTERFACE AND ADDS AN EXTRA FEATURE SUCH THAT THE DISPATCH METHODS ARE THEN CAPABLE OF ACCEPTING A CALLBACK FUNCTION AS THEIR ARGUMENT IN ADDITION TO AN ACTION OBJECT; AND IF THE ARGUMENT TO THE DISPATCH METHOD IS A CALLBACK FUNCTION DEFINITION THEN THE DISPATCH METHOD WILL RECOGNIZE IT AND WILL PASS TO IT ARGUMENT (dispatch, getState)
+
+
+What is a thunk ?
+Thunk is a programming concept where a function is used to delay the evaluation/calculation of an operation. A thunk is a function that wraps an expression to delay its evaluation.
+
+// calculation of 1 + 2 is immediate
+let x = 1 + 2;
+
+// calculation of 1 + 2 is delayed
+// foo can be called later to perform the calculation
+// foo is a thunk!
+let foo = () => 1 + 2;
+
+Much like the above, the call to the dispatch method is delayed by wrapping it inside of a thunk. The function that we return from the Action Creator is the actual thunk, because that's only the function definition not a function expression; that at the moment of return itself returns nothing cuz that is not a call; and that function definition is a thunk because it intercepts / delays the process of "dispatching of action to reducer" by wrapping the store.dispatch() call for later;
+
+Redux allows for middleware that sits between an action being dispatched and the action reaching the reducer.
+
+Redux Thunk is a middleware that lets you call action creators that return a function instead of an action object. That function receives the store’s dispatch method, which is then used to dispatch regular synchronous actions inside the function’s body once the asynchronous operations have been completed.
+
+redux-thunk allows us to fill our payloads with data from the database;
+
+THIS IS MADE POSSIBLE WITH THE USE OF BOTH:
+1) Action creator
+2) redux-thunk
+
+Action creators are normally used to return us some action objects which we can dispatch
+
+But when you want to have data in your action object's payload property from a database; then you have to return an anonymous function from the action creator function and that function is going to HALT THE DISPATCH METHOD FROM DISPATCHING THE ACTION TO THE REDUCER and PERFORM AN ASYNC OPERATION TO FILL THE PAYLOAD WITH DYNAMIC DATA and once the fetch call is finished AGAIN RESUMING THE DISPATCH PROCESS AND SEND THE FINAL ACTION OBJECT TO THE DISPATCHER;
+
+So the mere purpose of redux-thunk is to halt the dispatch method from dispatching the action object directly to the reducer and allowing us to grab data from the database;
+
+REMEMBER THAT THE DISPATCH PROCESS IS HALT FROM INSIDE OF THE ACTION CREATOR FUNCTION BY RETURNING A FUNCTION FROM INSIDE OF IT; AND FROM INSIDE OF THAT FUNCTION YOU MAKE AN ASYNC CALLS TO FETCH DATA;
+
+//Inside this returning function’s body, you first dispatch an immediate synchronous action to the reducer in the store to indicate that you’ve started fetching data from external API. Then you make the actual GET request to the server using fetch api or Axios. On a successful response from the server, you dispatch a synchronous success action with the data received from the response to the reducer, but on a failure response, we dispatch a different synchronous action with the error message to the reducer.
+
+redux-thunk is a middleware code that runs between the dispatcher and the reducer and allows us to perform asynchronous operations inside of our Action Creators;
+
+so: redux-thunk halts the dispatch, performs async request,resume dispatch;
+
+///////////////////////////////////////////////////////////
+               USING MULTIPLE REDUCERS:
+///////////////////////////////////////////////////////////
+
+=> At the end of the day there is only one reducer under the hood that's connected to the redux store (the global state object)
+
+=> multiple reducers are combined into one via the compose method;
+
+=> and that one rootReducer at the end contains all the actions from different reducers
+
+=> Remember whenever an *Action Object* is dispatched via the dispatch() method, The *Action Object* and the current State of the Store (i:e the global state object) is passed to the root reducer function;
+
+=> none of the Action Object is passed to a slice of the reducer, all the slices of a reducer at the end of the forms only one reducer and each and everything is only and only passed to this root reducer;
+
+
+////////////////////////////////////////////////////
+            combineReducers()
+////////////////////////////////////////////////////
+// REMEMBER: the job of a reducer is nothing but to return state;
+// DOCS says: combineReducers returns a Function and that function is a reducer itself which invokes every reducer inside the reducers object, and constructs a state object with the same shape.
+
+const rootReducer = combineReducers({
+    ctr: counterReducer,
+    res: resultReducer
+});
+
+above:
+1) combineReducers() is a function
+2) it takes as argument an object having reducers mapped to props
+3) combineReducers({prop: reducer}) executes
+4) it copies this passed object exactly as it is
+5) so at this point we have an object exactly same as the passed object {prop: reducer}
+6) then it returns an anonymous function
+7) This returned function is actually the root Reducer function it's job is to return global state object
+8) The important thing is that inside this anonymous function we have access to the copied object we had derived from the orignially passed object to the combineReducers();
+9) upon passing this rootReducer function to the createStore() function:
+10) an empty global object is going to be created first
+11) then inside this function each property of that object which has reference to the nested reducers is going to be executed
+12) each nested reducer upon invocation will return an object and that object is going to be pushed as a property inside the empty object which was created in step 10. The name of the key to which this object is mapped is going to be the same as the name of the key to which the reducer was mapped inside the copied object;
+13) after all the properties of the copied object are executed and we will have multiple properties inside a global state object , where each property is going to hold an object (slice of the global state object)
+14) at the end the final global state object is going to be returned and at the end of the day we will have something as follows:
+
+FOR:
+const rootReducer = combineReducers({
+    prop: counterReducer
+});
+
+const store = createStore(rootReducer);
+
+WE WILL HAVE SOMETHING AS FOLLOWS:
+state = {
+   prop: { counter: 0 }
+}
+
+considering that the initial state returned by the counterReducer is {counter: 0}
+
+SO: we can say that the combineReducers returns a root reducer which is a reducer of reducers;  combineReducers returns a Nesting reducer that nests a number of different reducers; and each nested reducer returns a slice of the global state it manipulates;
+
+All these slices returned by each nested reducer are combined and then at the end the Nesting Root Reducer returns a master state object that has all different slices of state of the application inside it as properties;
+
+Below we are mapping reducer functions to props inside an object; the counterReducer and resultReducer are both reducer functions wherein each returns a piece of state; rootReducer is also a function and is the one that's returned by the combineReducers; so rootReducer is something that returns the whole state, one part of this whole state is returned by the counterReducer and stored as ctr property inside the whole state returned by the rootReducer, while the other part of the whole state is returned by the resultReducer and store inside the whole state as res property;
+
+const rootReducer = combineReducers({
+    ctr: counterReducer,
+    res: resultReducer
+});
+
+so we get:
+
+state = {
+   ctr: { counter: 0 },
+   res: { result: [] }
+}
+
+NOW REMEMBER AGAIN THAT: the only job of a reducer is to return a state wether it is global or just a slice that is intended to be stored inside the global state;
+
+AND ALSO REMEMBER THAT: it is only the rootReducer function (having other nested reducer functions inside it) that's connected to the store; none of the other nested reducers is connected in any way to the store directly; it is just the rootReducer function that's connected to the redux store directly;
+
+NOW THE POINT TO NOTE HERE IS THAT: the rootReducer itself handles no action types directly; rather all types of actions dispatched are handled by the nested reducers that it has references to; and therefore, since the rootReducer is the one connected to the store, so whenever by any component an action is dispatched, that action is going to be redirected to the rootReducer so we can say that all actions dispatched are funnelled through one reducer and that is the rootReducer, and what the rootReducer is going to do is that it is going to accept that action object and frisk all the nested reducers inside it for that action type, and wherever it finds a match, it will execute the code under that case; and at the end of the day, it is going to be the rootReducer which is going to return an updated global state object which is going to update the current state in the redux store and thus components are going to have the new states as properties;
+
+ANOTHER POINT TO REMEMBER IS: that it is from inside of the rootReducer from where the nested reducers are executed, and it is totally upto the rootReducer which part of the entire whole current state it wants to pass to a given reducer that it invokes; SO: the combineReducers() function implements the rootReducer, (the function combineReducers returns), in a way that whenever it executes a particular reducer residing inside it, it DOES NOT pass to it the entire state, but based upon the key name of the reducer inside the *copied object*, it passes to it only a specific slice from the current global state object;
+
+*copied object* <to read more about it, search for the word>
+
+THIS BEHAVIOR ENABLES US TO SPLIT OUR ONE REDUCING FUNCTION INTO SEPARATE REDUCER FUNCTIONS AND THUS : each managing independent parts of the whole state.
 */
 
 

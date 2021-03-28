@@ -1,18 +1,14 @@
 import Product from '../components/Product';
 import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
-import useFetch from '../useFetch';
-import { useState } from 'react';
+import { useEffect } from 'react';
 
 
-const globalOb = {
-  name: 'ilyas'
-};
+const HomeScreen = (props) => {
 
-const HomeScreen = () => {
-  const { error, loading, data: products } = useFetch('/api/products');
-
-  const [name, setName] = useState(globalOb.name);
+  useEffect(() => {
+    //dispatch action from here. Remember, action won't go to the reducer right away; rather will be sent to the thunk (callback from the action creator), from the action creator the action object will be dispatched to the reducer
+  }, []);
 
   return (
     <div className="row center">
@@ -24,11 +20,6 @@ const HomeScreen = () => {
           return <Product key={product._id} product={product} />;
         })
       }
-
-      <div>
-        {name}
-        <button onClick={() => { globalOb.name = 'khan'; console.log(name, globalOb.name); }}>click me</button></div>
-
     </div>
   );
 };
