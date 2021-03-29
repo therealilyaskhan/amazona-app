@@ -80,17 +80,32 @@ ul {
 li {
   margin-top: 1rem;
 }
+
+input,
+select,
+textarea,
 button {
   padding: 1rem;
   border-radius: 0.5rem;
-  cursor: pointer;
   border: 1px #a4a4a4 solid;
   font-family: Helvetica, Arial, sans-serif;
   font-size: 1.6rem;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #f8f8f8;
 }
+
+button {
+  background-color: #f8f8f8;
+  cursor: pointer;
+}
+
+input:hover,
+select:hover,
+textarea:hover,
+button:hover {
+  border: 0.1rem #404040 solid;
+}
+
 button.primary {
   background-color: #f0c040;
   transition-delay: 0.05s;
@@ -113,6 +128,17 @@ a.brand {
   font-size: 3rem;
   font-weight: bold;
   color: #fff;
+}
+
+.badge {
+  background-color: #f02020;
+  border-radius: 50%;
+  color: #fff;
+  padding: 0.2rem 0.7rem;
+  margin-left: 0.25rem;
+  font-size: 1.4rem;
+  position: relative;
+  bottom: 0.5rem;
 }
 
 .row {
