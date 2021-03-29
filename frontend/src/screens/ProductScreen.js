@@ -1,61 +1,93 @@
-import { Link } from 'react-router-dom';
+import LoadingBox from '../components/LoadingBox';
+import MessageBox from '../components/MessageBox';
 import Rating from '../components/Rating';
-import data from './data';
+import productDetailsAction from '../store/actionCreators/productDetailsAction';
+import { Link } from 'react-router-dom';
+import { useEffect } from 'react';
+import { connect } from 'react-redux';
 
 const ProductScreen = (props) => {
-  const product = data.products.find(product => product._id === props.match.params.id);
 
-  if (!product) {
-    return <div>Product Not Found!!!</div>;
-  }
+  const productID = props.match.params.id;
+  console.log(productID);
+
+  useEffect(() => {
+    props.detailsProduct(productID);
+  }, []);
+
   return (
     <div>
-      <Link to="/">Back to results</Link>
-      <div className="row top" >
-        <div className="col-2">
-          <img src={product.image} className="large" alt={product.name}></img>
-        </div>
-        <div className="col-1">
-          <ul>
-            <li>
-              <h1>{product.name}</h1>
-            </li>
-            <li>
-              <Rating rating={product.rating} numReviews={product.numReviews} />
-            </li>
-            <li>
-              Price: ${product.price}
-            </li>
-            <li>
-              Description:
-            <p>{product.description}</p>
-            </li>
-          </ul>
-        </div>
-        <div className="col-1">
-          <div className="card card-body">
-            <ul>
-              <li>
-                <div className="row">
-                  <div>Price</div>
-                  <div className="price">${product.price}</div>
+      {
+        props.loading ? (
+          <LoadingBox />
+        ) : props.error ? (
+          <MessageBox msg={props.error} variant="danger" />
+        ) : (
+          <div>
+            <Link to="/">Back to results</Link>
+            <div className="row top" >
+              <div className="col-2">
+                <img src={props.product.image} className="large" alt={props.product.name}></img>
+              </div>
+              <div className="col-1">
+                <ul>
+                  <li>
+                    <h1>{props.product.name}</h1>
+                  </li>
+                  <li>
+                    <Rating rating={props.product.rating} numReviews={props.product.numReviews} />
+                  </li>
+                  <li>
+                    Price: ${props.product.price}
+                  </li>
+                  <li>
+                    Description:
+                <p>{props.product.description}</p>
+                  </li>
+                </ul>
+              </div>
+              <div className="col-1">
+                <div className="card card-body">
+                  <ul>
+                    <li>
+                      <div className="row">
+                        <div>Price</div>
+                        <div className="price">${props.product.price}</div>
+                      </div>
+                    </li>
+                    <li>
+                      <div className="row">
+                        <div>Status: </div>
+                        {props.product.countInStock > 0 ? <span className="success">In Stock</span> : <span className="danger">Product Unavailable</span>}
+                      </div>
+                    </li>
+                    <li>
+                      <button className="primary block">Add to Cart</button>
+                    </li>
+                  </ul>
                 </div>
-              </li>
-              <li>
-                <div className="row">
-                  <div>Status: </div>
-                  {product.countInStock > 0 ? <span className="success">In Stock</span> : <span className="danger">Product Unavailable</span>}
-                </div>
-              </li>
-              <li>
-                <button className="primary block">Add to Cart</button>
-              </li>
-            </ul>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        )
+      }
     </div>
   );
 };
 
-export default ProductScreen;
+const mapStateToProps = (state) => {
+  return {
+    loading: state.productDetails.loading,
+    error: state.productDetails.error,
+    product: state.productDetails.product
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    detailsProduct: (productID) => { dispatch(productDetailsAction(productID)); }
+  };
+};
+
+
+export default connect(mapStateToProps, mapDispatchToProps)(ProductScreen);

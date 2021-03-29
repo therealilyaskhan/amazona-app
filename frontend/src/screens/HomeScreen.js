@@ -29,9 +29,9 @@ const HomeScreen = (props) => {
 
 const mapStateToProps = (state) => {
   return {
-    loading: state.productListReducer.loading,
-    error: state.productListReducer.error,
-    products: state.productListReducer.products
+    loading: state.productList.loading,
+    error: state.productList.error,
+    products: state.productList.products
   };
 };
 

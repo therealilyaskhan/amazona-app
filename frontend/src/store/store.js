@@ -1,13 +1,16 @@
 import { applyMiddleware, combineReducers, compose, createStore } from 'redux';
 import thunk from 'redux-thunk';
 import productListReducer from './reducers/productListReducer';
+import productDetailsReducer from './reducers/productDetailsReducer';
 
 //A redux store is nothing but a javascript object that represents the global state of our application
 //in order to create a store we first need a reducer and an initial state of our application
 const initialState = {};
 const reducers = {
-  productListReducer
+  productList: productListReducer,
+  productDetails: productDetailsReducer
 };
+
 const rootReducer = combineReducers(reducers);
 
 const composeEnhancer = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;

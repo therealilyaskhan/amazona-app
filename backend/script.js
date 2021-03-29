@@ -6,9 +6,18 @@ const app = express();
 const port = process.env.PORT || 5000;
 import data from './data.js';
 
+app.get('/api/products/:id', (req, res) => {
+  const product = data.find(x => x._id === req.params.id);
+  if (product)
+    res.json(product);
+  else
+    res.status(404).send({ message: "Product not Found!" });
+});
+
 app.get('/api/products', (req, res) => {
   res.json(data);
 });
+
 
 app.get('/', (req, res) => res.send('Hello World!'));
 app.listen(port, () => console.log(`server at https://localhost:${port}`));

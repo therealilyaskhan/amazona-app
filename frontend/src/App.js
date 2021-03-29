@@ -18,7 +18,7 @@ function App() {
         <main>
           <Switch>
             <Route path="/" component={HomeScreen} exact></Route>
-            <Route path="/product/:id" component={ProductScreen} ></Route>
+            <Route path="/products/:id" component={ProductScreen} ></Route>
           </Switch>
         </main>
         <footer className="row center">
