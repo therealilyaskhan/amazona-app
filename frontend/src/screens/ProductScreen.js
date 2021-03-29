@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import Rating from '../components/Rating';
-import data from '../data';
+import data from './data';
 
 const ProductScreen = (props) => {
   const product = data.products.find(product => product._id === props.match.params.id);

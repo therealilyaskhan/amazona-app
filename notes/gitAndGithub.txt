@@ -221,6 +221,22 @@ Using the "-v" option, you will also see the remote's URLs in listings.
             BRANCHING
 ///////////////////////////////////
 
+/////////////////////////////////////////////////////////////////
+  SHARING YOU CODE ON GITHUB / ADDING CODE TO GITHUB REPOSITORY
+  / PUTTING YOUR LOCAL GITHUB REPOSITORY ONLINE VIA GIT 
+/////////////////////////////////////////////////////////////////
+1) Goto Github 
+2) create new repository
+3) name your repository
+4) click on create repository (change nothing else)
+5) goto local root project folder
+6) open in bash
+7) type "git init"
+8) create a ".ignore" file in your project root (copy the .gitignore file from mern biolerplate project on github)
+9) at this point you created a local github repository 
+10) now time to put it online
+11) run "git remote add origin git@github.com:therealilyaskhan/yourGitRepoName.git" to connect your local repo to online repo you had created on github in step 2
+12) final run: "git push -u origin main" to push your local changes to online github repo;
 
 
 

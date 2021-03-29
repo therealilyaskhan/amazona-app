@@ -1,22 +1,25 @@
 import Product from '../components/Product';
 import LoadingBox from '../components/LoadingBox';
 import MessageBox from '../components/MessageBox';
+import productListAction from '../store/actionCreators/productListAction';
 import { useEffect } from 'react';
+import { connect } from 'react-redux';
 
 
 const HomeScreen = (props) => {
 
   useEffect(() => {
     //dispatch action from here. Remember, action won't go to the reducer right away; rather will be sent to the thunk (callback from the action creator), from the action creator the action object will be dispatched to the reducer
+    props.listProducts('/api/products');
   }, []);
 
   return (
     <div className="row center">
 
-      { loading && <LoadingBox />}
-      { error && <MessageBox msg={error} variant="danger" />}
+      { props.loading && <LoadingBox />}
+      { props.error && <MessageBox msg={props.error} variant="danger" />}
       {
-        products && products.map((product) => {
+        props.products && props.products.map((product) => {
           return <Product key={product._id} product={product} />;
         })
       }
@@ -24,4 +27,21 @@ const HomeScreen = (props) => {
   );
 };
 
-export default HomeScreen;
+const mapStateToProps = (state) => {
+  return {
+    loading: state.productListReducer.loading,
+    error: state.productListReducer.error,
+    products: state.productListReducer.products
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    listProducts: (url) => { dispatch(productListAction(url)); }
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(HomeScreen);
+
+
+
