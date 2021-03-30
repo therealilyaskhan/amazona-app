@@ -83,6 +83,7 @@ const ProductScreen = (props) => {
                                     </option>
                                   )
                                 )}
+
                               </select>
                             </div>
                           </div>

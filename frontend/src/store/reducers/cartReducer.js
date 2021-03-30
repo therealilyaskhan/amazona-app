@@ -1,4 +1,4 @@
-import { ADD_TO_CART_SUCCESS, ADD_TO_CART_FAIL } from '../constants/actionTypes';
+import { ADD_TO_CART_SUCCESS, ADD_TO_CART_FAIL, REMOVE_FROM_CART_SUCCESS } from '../constants/actionTypes';
 
 const initialState = {
   cartItems: []
@@ -25,6 +25,15 @@ const reducer = (state = initialState, action) => {
     case ADD_TO_CART_FAIL:
       return {
         cart: state.cartItems
+      };
+
+    case REMOVE_FROM_CART_SUCCESS:
+      const productID = action.payload;
+      return {
+        ...state,
+        cartItems: state.cartItems.filter(
+          item => productID !== item.product
+        )
       };
 
     default:
