@@ -1,0 +1,591 @@
+
+Database: 
+      physical container (a folder) for files (collections). A single mongoDB server can have multiple mongoDB databases;
+
+Collection: 
+      Collection of "documents" equivalent of RDBMS table. A single mongoDB database can have multiple collections;
+
+Document: 
+      Basic data unit in a mongoDB database. It is the collection of documents that forms a mongoDB database; A single record in a mongoDB collection. it is a JSON object (set of key: value pairs); it is equivalent to RDBMS record inside a table; a single record is called a document; A single mongoDB collection (table) can have multiple Documents (records)
+      Example of a document:
+              {
+                name: {first: "Muhammad", lastName: "ilyas"},
+                age: 24,
+                sex: "M",
+                hobbies: ["cricket", "running", "hiking"]
+              }
+
+Schema:
+      The structure of one document, the name and the type of fields it have, the number of fields a document have, all these collectively is called schema of a document;
+
+      (Though mongoDB doesn't enforce schema BUT you will have to have all your documents under one collection follow a certain schema because when you will retrive your documents from a mongoDB collection inside your application layer using a driver then you will have to run a loop thorugh the list of these documents and your loop is going to have a structure fitting the schema (structure) of your retrieved documents)
+
+Note that: 
+      (COLLECTION DOESN'T ENFORCE SCHEMA)
+      What does the above statement mean ?
+      Well, Each document in a collection is like a record in an RDBMS table BUT unlike the RDBMS table records, all documents (records) inside a mongoDB collection are not supposed to have similar fields, rather documents inside a collection can possess different fields for example:
+      
+      {
+        name: {"ilyas", "khan"},
+        age: 24,
+        sex: "M"
+      }
+
+      and 
+
+      {
+        name: "ilyas"
+        hobbies: ["a", "b", "c"],
+        address: "blah blah blah",
+      }
+
+      both the above documents can peacefully live under the same collection;
+
+field:
+      a name value pair in a mongo Document;
+
+field path:
+      To specify path to a field inside a document use a string that precedes the field name with a dollar sign ($) such as:
+      "$fieldName"
+
+$ operator:
+      A reserved mongoDB keyword beginning with a $ sign is used to express an:
+       1) update 
+       2) complex query
+       3) data transformation 
+      inside a document; for example: $gt represents a complex query that is used to perform 'greater than' query on data;
+
+ObjectId:
+      You can think of it as Int, String, Array, Object, data types in JavaScript; as the instance of Int premitive class inside javascript are capable of generating any number between the range (-2^53 to + 2^53); similarly ObjectID is a BSON type that will always return a randomly generated new unique value weighting 12 bytes;
+      ==> 1st 4 bytes: a 4-byte timestamp value, representing the ObjectId's creation,
+      ==> 2nd 5 bytes: random value
+      ==> last 3 bytes: incrementing counter
+
+_id:
+      A field required in every MongoDB document. The _id field must have a unique value. You can think of the _id field as the document's primary key. If you create a new document without an _id field, MongoDB automatically creates the field and assigns a unique value returned by the BSON ObjectId. But you can put any unique info into that field.; there's rarely a need to provide it. MongoDB primary keys are your friends;
+
+primary key:
+      A document's unique immutable identifier. In an RDBMS, the primary key is typically an integer stored in each row's id field. In MongoDB, the _id field holds a document's primary key which is usually a BSON ObjectId.
+
+Why mongoDB is efficient and flexible ?
+Efficiency:
+      One core feature of mongoDB is that you end up having less tables (collections) as compared to the Relational Databases, since mongoDB is not a relational database so you don't have to normalize your data by splitting different fields (cols) of a single record into different tables and then establishing connections between these tables via PK and FK rather in mongoDB, all fields of a single record are stored inside a single document and is not distributed among different document;
+
+      This is where Efficiency derives from, since for a record, all the data is in one single document, all fields of a record are inside one single room, so you don't travel anywhere else , i:e you don't have to go through different tables that are connected via PK and FK in order to reach out to specific fields for a record; the records are not distributed among collections rather each record is held by one document under a single collection; So: mongo doesn't have to do any merging of collections (tables) in order to fetch data for you;
+
+Flexible:
+      It doesn't enforce any schema, each record (document) in a table (collection) can have different or similar fields;
+
+
+Stop mongoDB service on Windows:
+1) goto cmd
+2) run "net stop mongoDB"
+
+The mongoDB server should be running in the background as a Windows service and then we by using the 'mongo' command in the cmd the mongo lets us connect to the mongoDB server; 
+
+If you are getting an error while connecting to the mongoDB server then the mongoDB must not be running as a service in windows in the background in order to enable the mongoDB to run as a service goto task manager go to services and start mongoDB;
+
+//////////////////////////////////////////////////////
+                mongo shell
+//////////////////////////////////////////////////////
+AS YOU RUN THE "mongo" COMMAND IN THE TERMINAL:
+You are connected to the mongoDB server and also you are taken to something call "mongo Shell" which is connected to the server;
+
+you make interact with the mongoDB server via the mongo shell;
+
+mongo shell is the runtime interpreter environment where you can run commands against your mongoDB server such as creating new databases , create collection inside databases, create new documents, fetch data from a collection and so on;
+
+//////////////////////////////////////////
+        mongo shell vs driver
+//////////////////////////////////////////
+REMEMBER:
+      You always manage your database from the shell, and interact with the database from the driver; there is a difference between database management and interaction;
+
+A mongo shell is the core interpreter written in c++ which allows you to interact with the mongoDB server via commands which are interpreted by the shell;
+
+and drivers are packages i:e (bunch of code written by other people) that allows you to communicate with the mongoDB server by not directly executing your commands at shell but rather interact with the mongoDB server from a specific language;
+
+The driver for javascript language to interact with a mongoDB server is a Node.js package called "mongodb" which you install via:
+      "npm install mongodb --save"
+
+each language has specific library called mongo driver that provides you with an interface via which you can talk to the mongoDB server by using the same syntax and structure that your language has;
+
+you can think of the driver as a middle man that takes your code and runs its equivalent mongo shell command behind the scenes and lets you interact with the mongoDB server;
+
+Node.js package called "mongodb" is official driver for javascript application that wants to connect with the mongoDB server; Node.js "mongodb" driver offers you such methods and function that lets you talk to the mongoDB server;
+
+
+///////////////////////////////////////////////////////////////
+A big picture of how different parts in your application are going to communicate:
+///////////////////////////////////////////////////////////////
+An application is generally divided into two / 2 solid layers:
+1) application layer
+2) data layer
+
+The application layer is comprised of the UI and the Backend Code; although UI at the end of the day lives on the client side and the backend code lives permanently on the server side such as the APIs, but both are considered part of the application layer since the UI interacts directly with the backend APIs,
+
+The data layer is what comprises of the physical files that possesses your data inside storage devices and a server (such as the mongoDB server) that accepts commands and goes and serves you with your requested data from these files (collections)
+
+Now your UI never comes directly face to face with the database server rather for the application layer to contact with the data layer your application's backend part has to communicate with the database server via something called "drivers". This is because if your UI comes in direct contact with the database server and send direct requests for data fetch to the mongoDB server then you will have to connect to the mongoDB server from your frontend UI code in order to interact with the server and that is going to expose your database credentials to everyone inside the client side javascript files;
+
+The express / nodejs server acts as a middle man , client requests for data from the express server and the express server requests data from the database mongoDB server; the only reason for this indirect data request is to hide potential information and deatils from the user;
+
+Drivers interact with the mongoDB server that you will start via the "mongod" command; A running mongoDB server is capable of taking in queries from either shell connected to it or a driver in contact with it;
+
+Node.js is a driver that is there on the backend side of your application and has an interface that lets you interact with the mongoDB server and the server as a result goes and parses these physical files for you and servers you with data;
+
+USER INTERFACE (UI)
+  /\
+  ||
+  ||
+  \/
+BACKEND SERVER (Node.js express server)
+  /\
+  ||
+  ||
+  \/
+MongoDB Server (Atlas cluster)
+  /\
+  ||
+  ||
+  \/
+Physical Database such as local hard drives containing files comprising of collections and documents in a format understandable by the mongoDB server
+
+/////////////////////////////////////////////////////////////
+Client:
+<Client Simply refers to the Application layer>
+The Application layer that uses a database for data storage from which it retrieves data and populates it on the UI. Drivers provide the interface level between the application layer and the database server means that drivers on the backend are means of communication between the application layer and the database server;
+
+///////////////////////////////////////////////////////////////
+
+Cursor:
+ONE THING TO REMEMBER:
+        The cursor object itself doesn't contain the actual data or say result set of the query inside it; rather it contains a lot of metadata about what to fetch now and what to fetch next() from the mongoDB
+
+A cursor is an object returned by the dot find() method; MongoDB returns data in batches rather than sending all the result set of a query at once to the client layer; It rather assigns the client with a special kind of "cursor object" that holds information about which particular piece of information to fetch next from the database; By default, the cursor will be iterated automatically when the result of the query is returned.
+
+if the returned cursor is not assigned to a variable using the var keyword, then the cursor is automatically iterated up to 20 times [1] to print up to the first 20 documents in the results.
+
+A cursor is a pointer or say a handle to the result set of a query. If you are querying a set of documents from the database then in such a case the cursor is going to point at one single document at a given time; If your query's result set contains fields and not documents then the cursor is going to point at one particular field at a given time; Clients can iterate through a cursor to retrieve results of the query one by one.
+
+That's the reason why the dot .findOne() method doesn't support the dot .pretty() method cuz the dot findOne() method doesn't returns a cursor object it rather returns directly data from the database; and the dot pretty() method is only available on the cursor object
+
+For other method such as insert , delete , update , the cursors object do not exist because they are not used to fetch data from the database;
+
+//////////////////////////////////////////////////////////////
+
+Projection:
+      It is the process of limiting the amount of data that the server / data layer has to send the application / client; This filtering out of certain fields form the query result set is done over the server side;
+
+
+//////////////////////////////////////////////////////////////
+
+Embedded Documents:
+      are the documents that are inside another document;
+
+//////////////////////////////////////////////////////////////
+Entity:
+      Database entity is a thing, person, place, unit, object or any item about which the data should be captured and stored in the form of properties
+
+//////////////////////////////////////////////////////////////
+            RELATIONS BETWEEN COLLECTIONS
+      Modelling Relations Between Different Data
+//////////////////////////////////////////////////////////////
+Remember that documents are the basic unit of data inside a mongoDB database and a relation between documents leads to relation between collections; So it is the documents that are related at the end of the day; and the relation between documents causes and gives birth to the term relations;
+
+But you don't always have to make new collections for different documents having different schema (structure) and then forming a relation between those collections rather you can also achieve relationships between documents by Nesting / embedding documents within documents
+
+E:g let's say you have a customer collection and inside that customer collection you have a document having "customer's" details such as:
+
+{
+      customerName: "ilyas",
+      age: 24
+}
+
+now this customer must also have an address and the address can further be a document as follows:
+{
+      street: "Chungi no 3",
+      city: attock,
+      postalcode: 46300
+}
+
+now both the documents are related we can either simply establish the relationship between these two documents by simply nesting the address document inside the customer details document:
+
+{
+      customerName: "ilyas",
+      age: 24,
+      address: {
+            street: "Chungi no 3",
+            city: attock,
+            postalcode: 46300
+          }
+}
+
+Now the problem above is that we will end up having a  lot of duplicate data ; cuz 1000 customers may have same address; now if let's say something about an address changes for example: lets suppose the postalcode of a particular address changes from 1122 to 3344 then for that address you will have to change the postalcode field inside all the 1000 customer's documents;
+
+ALTERNATIVE WAY TO ESTABLISH RELATIONSHIPS BETWEEN DATA:-
+(USING REFERENCES)
+or we can create a new collection by the name addresses and then assign each specific address an ID and then refer to this id from inside of the customer details document;
+
+So we will have have a customer's collection:-
+{
+      customerName: "ilyas",
+      age: 24,
+      address: 'id1'
+}
+
+and an addresses collection having documents each holding different address:
+{
+      _id: 'id1',
+      street: "Chungi no 3",
+      city: attock,
+      postalcode: 46300           
+}
+
+Now if something changes about the address we just have to change it in one place;
+
+But now we have to run two queries instead of one cuz earlier we were running only one query cuz all the data was under one collection inside one document but now, since there are two collections and data lives in two separate documents so: one for fetching customer's details and the other using the id1 for fetching the customer's address from another collection;
+
+
+WHEN TO USE EMBEDDED DOCUMENTS AND WHEN TO USE REFERENCED DOCUMENTS ?
+
+1) Strong One to One relationship:
+      One to one is a relationship where one document inside a collection is associated with one and only one document in another collection and vice versa;
+
+      In other words: a relationship between two entities "A" and "B" in which one element/record/document of A may only be linked to one element/record/document of B, and vice versa.
+
+                        In such a data relationship most of the time (NOT ALWAYS) use embedded document; for example we have a patient collection where we have different data about a patient such as patient name and patient age etc.. now each patient must have a unique disease summary; this is what is called one to one relationship; 
+
+                        In one to one relationship one document (record) inside a collection must be associated with one and only one document in some other collection;
+
+            patient entity <-|------|-> disease summary entity
+
+            So the above relationship between two collections(tables) applies that one patient ({patient}) can have only one summary ({summary}) and one particular summary can only belong to one patient; one summary can't belong to two patient documents;
+
+            So this is a strong one to one relationship; in such case we should never use a REFERENCE METHOD to establish relationship between documents; rather the NESTING / EMBEDDING DOCUMENT WITHIN DOCUMENT WORKS BEST HERE;
+
+THERE IS AN EXCEPTIONAL USE CASE WHERE: despite of having a strong one to one relationship between two entities you still won't embed them together under the same collection rather you would go for the reference approach to connect both the entities WHY ? just because of an application driven reason; there might be a scenario where you would like to analyze both the entities in isolation an apply some ML and analytics onto each the entities separately to draw some conclusions then in such a scenario blending both the entities shall make it difficult for you to work in peace with only one entity at a time rather if you want to work with one of these entities you will have to fetch the whole document and then extract the document of your choice out of it and then apply your maths and stats over that; which is no so optimal; 
+
+2) One to many relationships:
+      In one to many relationship one document inside a collection can be associated with one or more documents inside another collection;
+
+      For example we have a Questions collection inside which each document represents a question and an Answers collection where each document represents a unique answer;
+
+      Now as one question can have multiple answers but a single answer can not belong to multiple questions;
+
+      which means that one document inside the question collection can be associated with multiple documents inside the answers collection but one document from the answers can't be associated with multiple documents from the questions collection;
+
+      so:
+
+      QUESTIONS <-|----------< ANSWERS
+
+      ==> In such a case scenario embedding most of the times (NOT ALWAYS) is a better solution unless there is an exceptional case like some application driven reason i:e until your application requirements are forcing you to split up the data relations into multiple collections you should always go for the embedding approach in a one to many scenario; because again each of your question will have a unique set of answers so embedding the list of answer documents inside your questions collection makes much more sense; because no other question in the questions collection is going to point to the answers of another question; each question document inside the questions collection will have its own unique set of answers list; 
+
+      Inside each question document we will have multiple (many) embedded answer documents since it is a one question to many answers relationship;
+
+      And since most of the times we need to fetch questions along with the answers so we model our data (the document structure) in such a way that we merge inside each question document the list of its answer documents;
+
+AN EXCEPTIONAL ONE TO MANY USE CASE WHERE YOU WOULD NOT MERGE YOUR ENTITIES UNDER THE SAME COLLECTION RATHER WOULD GO FOR THE REFERENCE APPROACH TO CONNECT/RELATE BOTH THE ENTITIES AND FOR BOTH THE ENTITIES CREATE DIFFERENT COLLECTIONS:-
+
+Suppose you have one to many relationship between cities and citizens where cities is a separate entity for which you will create a collection wherein each document will represent a separate independent city possessing details about that city and the citizens is also an entity for which you may create a collection where each document holds information about a single unique citizen;
+
+Now embedding the list of citizens inside the city document will make much sense since each city will have its own population and no other city in the cities collection can claim a citizen from another city since a person can not be counted as two means a single person can't exist at two places in one time;
+
+BUT imagine you want to collect just the meta information about the cities and you are not interested in the citizens living inside it ; then to only retrieve a few chunks of data about the cities you will have to unnecessarily retrieve the data about the million citizens living in the city IN CASE YOU HAD THE CITIZENS EMBEDDED INSIDE YOUR CITY DOCUMENT;
+
+So splitting it up makes more sense in such a one to many use case than embedding and merging the relating data;
+
+3) Many to Many:
+      a type of relationship where multiple documents in one collection are associated with multiple documents in another collection and vice versa;
+      Such as the customers and the favorite books example;
+
+      one customer can have many favorite books and one book can be favorite of many customers:
+
+      Customer Entity >--------< Books Entity
+
+      In such a use case most of the times (BUT NOT ALWAYS) you go for reference approach to establish connection between documents rather than embedding and thus merging documents together;
+
+AN EXCEPTIONAL MANY TO MANY USE CASE WHERE YOU WOULD MERGE YOUR ENTITIES UNDER THE SAME COLLECTION RATHER THAN GOING FOR THE REFERENCE APPROACH TO CONNECT/RELATE BOTH THE ENTITIES:-
+
+      Suppose you have "Customers" and "Products" Collections ; 
+      Now relation between the customers and products is that one customer can order several products and there can be multiple orders for a product SO:
+
+                  customer(s) >-----< product(s)
+
+                  many customers to many products
+
+      Now we may think in the first place that forming a relation between customers and products via references would be a great idea no doubt also a good idea but even better in this case would be to embed the products inside the customer document for which a particular customer has orders; This embedding approach is much better in this many to many use case;
+
+
+TO RECAPITULATE : WHEN TO USE EMBEDDED APPROACH AND WHEN TO USE REFERENCE APPROACH ?
+=> It depends upon a lot of factors:
+1) most of the time for one to one: embedded
+2) most of the time for one to many: embedded
+3) most of the time for many to many: referenced
+4) how often would you change a piece of data ? if very rare then: embedded and if the change frequency is going to be high then: referenced
+5) how large your embedding document is ? if the embedding documents are too heavy just like those of the citizens in a city then: referenced
+6) does not updating the duplicate data would matter ? if NOT updating the duplicate data doesn't effect your application's behavior then: embedded; otherwise if a particular piece of data is updated in one place in the database and the data is necessary to be updated in each and every place across the database then: referenced;
+
+Advantage of embedding:
+                  easier time while fetching the data and fetching process is fast;
+
+Advantage of referencing:
+                  easier to update data across the database by only updating data in one place;
+
+
+////////////////////////////////////////////////////////////////
+joining or say merging two related documents with $lookup operator
+////////////////////////////////////////////////////////////////
+Joining in mongoDB is done merely to convert referenced documents into embedded documents; and reform out of multiple collections a single collection by brining all these related documents from multiple collections under a single collection;
+
+First off what is joining:
+            Joining is the process of merging / embedding related documents from two or more collections based upon a common or say related field between the documents from these collections;
+
+            REMEMBER: joining of collections is always done based upon matching field between the documents of two collections;
+
+            Fetch two related documents from two collections based upon a common field , merge one document inside the other based upon the kind of join you are doing and return the resulting single document;
+
+INNER JOIN:
+            lets say we have:
+            -collection1
+            -collection2
+            Apply inner join on these two collections based upon two related fields: one field from the documents in collection1 and other field from the documents in collection2; let's say we pick "author" key from collection1 and "_id" key from collection2, now each time a document from collection1 has an author field's value equal to "_id" field's value from collection2, both the documents will be merged together i:e one document will be embedded inside the other based upon what type of join you are doing; and the resultant single document will be pushed into a new anonymous collection which is being constructed;
+
+LEFT OUTER JOIN:
+            This kind of join between two collections (collection1 and collection2) will produce a new collection such that the new collection will contain all the documents from collection1 plus only the matching documents from collection2; The matching documents from collection1 will be nested into the matching documents from collection1 under a new field and the name of that field is decided by you;
+
+            following is the syntax to do LEFT OUTER JOIN IN MongoDB:
+
+db.collection1.aggregate([{$lookup: {from: "theCollectionFromWhichYouWantToPullInDocumentsAndPushEmIntoTheCollection1", localField: "aFieldFromCollection1", foreignField: "aFieldFromCollection2WhichYouWantToCompareWithLocalField", as: "listOfMatchingDocuments" }}]).pretty()
+ 
+ ////////////////////////////////////////////////////////////
+                  MongoDB Compass
+ ////////////////////////////////////////////////////////////
+ Is a GUI that lets you see your databases on your mongoDB server in a graphical form  and interact with them in graphical form such as you can perform all the crud operations over your data in the database but using graphical interface by using compass;
+
+ All you have to do is to connect your compass to your up and running mongoDB server; for that first run the mongoDB as a service in the background;
+
+ using compass you can grpahically:
+ 1) create new databases 
+ 2) manipulate exisiting databases grpahically
+ 3) perform crud opreations on collections and docs grpahically
+
+ //////////////////////////////////////////////////////
+            unordered inserts into a collection:
+ //////////////////////////////////////////////////////
+insertMany([list of documents], {ordered: false}):-
+                                    The second document passed to 
+      insertMany() method lets you configure wether you want to insert the listed documents into  a collection in an ordered manner (default behavior) or and unordred; unordered will cause the insertMany to keep inserting the doucments even if some error occurs at one of the documents such as duplicate primary key error won't stop the insertMany from inserting documents into the collection;
+
+/////////////////////////////////////////////////////////////
+            methods , filters , and operators
+/////////////////////////////////////////////////////////////
+everything that you execute after db.collection.method() is a method such as:
+find()
+findOne()
+insertOne()
+insertMany()
+etc...
+
+
+Operators:
+      Two types of operators when it comes to the R and D of the crud:
+      1) query operators such as $gt to limit the number of documents
+      2) projection operator to limit the number of fields in documents;
+
+      Two types of operators when it comes to the U of the crud:
+      1) operators to simply update the field of a document
+      2) operator to simply update a list (Array) inside a document
+
+      For the C of the crud there are no operators;
+
+///////////////////////////////////////////////////////////////
+                  GeoSpatial Data 
+///////////////////////////////////////////////////////////////
+Special GeoJSON objects are used to store GeoSpatial data inside a mongoDB collection; GeoJSON objects has a specific structure and format of storing data (properties) inside it; 
+
+NOTE THAT: GeoJSON itself is not the object, it is just the standard, it is format and any objects that are in the GeoJSON format are of type GeoJSON; There are a lot of GeoJSON objects that are supported by mongoDB and all are in compliance with the GeoJSON format:
+      1) Point
+      2) MultiPoint
+      3) LineString
+      4) MultiLineString
+      etc...
+
+The format of a GeoJSON object is followed as:
+
+{
+      type: <GeoJSON type such as "Point","LineString" etc>,
+      coordinates: [
+            longitude,
+            latitude    
+      ]
+}
+
+////////////////////
+GeoSpatial QUERIES:-
+////////////////////
+$near:
+      Used to find which points in the collection are near to our point that we pass to this query;
+            This complex query is used to find the nearby GeoSpatial points in a collection. Near to what ? well near to the GeoSpatial point which is passed to this $near query as argument via the $geometry operator,  the being passed $geometry point which is in the GeoJSON object format will be compared against the the saved GeoSpatial points inside the collection and all those GeoSpatial points from the collection will be returned which comes inside the distance limit that you pass to this $near query as a second argument and third argument; the distance you define as second argument to the $near query is a maximum distance via the $maxDistance operator and as third argument you define $minDistance; starting from the geometry point that you pass to the $near query , $near query will collect all those GeoSpatial points from the collection that falls inside the boundaries you define; This complex $near query needs a geospatial index in order for it to run!
+
+            Note that : the boundaries that you define are in meters;
+
+$geometry:
+            This operator is used to specify the GeoJSON object which we want to check against the saved GeoJSON objects inside the database that how near the being checked object is in realtion to the saved one;
+
+//////////////////////////////////////////////////////////////
+                        index
+//////////////////////////////////////////////////////////////
+You create index for a specific key in a collection
+
+An index is a list of "values" of the keys which you have indexed in the original collection;
+
+These "values" in an index are in a particular order and that particular order is specified by us for numbers incremental or decremental for text alphabetic etc; So basically the values are sorted;
+
+Each item in an index also has a pointer which points to the full document to which it belongs to;
+
+MongoDB first see if an index exists in the database for a particular field/key which is being queried; and therefore mongoDB first scans the index and after it finds the right value for the field/key in the index, it follows the pointer of that value and finally reaches the desired document;
+
+//////////////////////////////////////////////////////////
+      WHY OVERCREATING INDEXES CAN EFFECT PERFORMANCE ?
+//////////////////////////////////////////////////////////
+because an index is created on a field in a collection
+if you create index on each field in a collection
+then for each field of the documents in a collection a separate isolated index is going to be maintained
+and if you apply some insert or update query on the collection: i:e delete one of the documents, update the value of the indexed field, or insert a new document then the associated indexes will also be updated;
+
+So in a collection if you have 10 indexed keys then on inserting a new document in the collection 10 differnt indexes are going to be updated; and insert a new value into each index;
+
+////////////////////////////////////////////////////////////////
+                        Replica Set
+////////////////////////////////////////////////////////////////
+Replicated databases are created on a single computer; means let's say you have 3 mongoDB server instances on a computer , one primary and 2 Secondary nodes, now 3 replica databases spaces will be created on the computer and each instance of the server will manage its own database space / portion;
+
+A replica set is a set of mongoDB server instances; Where each server inside a replica set is referred to as a "Node";
+
+Inside the replica set there is one Node which is called "Primary Node" and the primary node is the only instance of the server to which we talk from our driver;
+
+All the other Nodes are called "Secondary Nodes". These are additional instances of the mongoDB server;
+
+Now if you execute some write query over the database via the "Primary Node" by passing the query from your driver to the "Primary Node", the main server instance inside the replica set i:e the primary node inside the replica set will apply your query on the physical database and the changes in the database will be mirrored inside the Secondary nodes asynchronously; i:e if you insert data into the database by passing the insert query to "Primary Node"; the primary node will write the data to the primary database and then later on also replicates this data and sort of synchronize this data into the databases of the secondary nodes;
+
+So it means that your database is then not handled by only one mongoDB server that listens to client queries but you also have backup mongoDB instances ; that also listens to queries from your driver (application)
+
+so if one of the mongoDB server instance goes down our driver can talk to other backup server instance in the replica set or say the server instance in the cluster;
+
+///////////////////////////////////////////////////////////////
+                        Atlas Cluster
+///////////////////////////////////////////////////////////////
+Cluster:
+      It in simple words is the final mongoDB environment that you are going to deploy / put live;
+      So in short cluster is your deployed mongoDB server;
+
+      For example, while creating an Atlas Cluster, they will ask you whether you want a replicaset, sharded cluster, etc. Also, in which cloud provider you want to deploy. Your backup policy, the specs of your MongoDB hardware and all these different questions and at the end of the questions a cluster will be all setup for you to deploy;
+
+/////////////////////////////////////////////////////////////////
+            White List IP Address In mongoDB cluster 
+/////////////////////////////////////////////////////////////////
+After deploying your mongoDB cluster, you should whitelist the iP address of the machine  / the server that is running your backend mongoDB node driver; because from the user agent a request will be made by the user's browser to one of the REST apis on your express server, and the express server is going to route those requests to your cluster get the response back from the mongoDB cluster and return the data back to the browser;
+
+So it must be only be the machine on which your express server is running that is going to be whitelisted in your MongoDB Atlas Cluster;
+
+/////////////////////////////////////////////////////////////////
+                  Shell       Vs         Driver
+/////////////////////////////////////////////////////////////////
+After creating cluster and deploying it on the Atlas, then For CRUD operations you will have to connect your driver to the cluster (by whitelisting the machine's ip that's running your driver) 
+
+You will also have to connect to the cluster from the shell; why ? 
+Because:
+      You always manage your database from the shell, and interact with the database from the driver; there is a difference between database management and interaction; such as creation of collections , creation of indexes, and other configurations of database comes under the umbrella of database management;
+
+///////////////////////////////////////////////////////////////
+                  MongoDB driver (the npm package)
+                                VS
+                             Mongoose
+///////////////////////////////////////////////////////////////
+IN SIMPLE WORDS:
+            It is an ODM (object data modelling) library which means that using mongoose we model the structure and the data (type and other validations) of an object for the sake of mongoDB ; ye wo library hai jis me hum objects ko model karty hen aur objects k ander data ko b model karty hen naiz es gharz se k hum phr us fixed structured object ko as a document mongoDB main push kr saken;
+
+Mongodb and Mongoose are two different drivers to interact with MongoDB database.
+Mongoose is built on the top of the mongodb driver;
+
+mongodb is the native driver for interacting with a mongodb instance (the server / the node) 
+
+============
+MONGOOSE:-
+============
+      Now remember that mongoDB the database never enforce any document schema;
+
+      Now mongoose is such a client side package that enforces document schema on the application layer; such that when the documents are sent out to the database server for insertion in the database, they are in proper structure, and a validated format;
+
+      It is said that mongoose is an "Object modeling tool" for MongoDB.
+      What does object modelling mean ?
+      What that means is that Mongoose is all about Schemas and Models; Object modelling means that we create a "Model Class" out of a javascript literal object; 
+
+      const schema = new mongoose.Schema({ name: 'string', size: 'string' });
+      const Tank = mongoose.model('Tank', schema);
+
+      When you call mongoose.model() on a schema, Mongoose compiles a model for you.
+
+      The first argument to the mongoose.model() is the singular name of the collection your model is for. Mongoose automatically looks for the plural of this word that you pass as first argument and sets that plural as your collection name in the database in a lowercased version. Thus, for the example above, the model Tank is for the tanks collection in the database.
+
+      Similarly if your model name is Person then your collection name will automatically be decided by the mongoose and it will be plural of Person which is People; because a collection is a list of Person so People;
+      
+      This Model class enforces document structure according to the schema from which it is compiled or say derived and also enforces the data type of the properties inside of the schema that it represents;
+
+      Now when ever you instantiate this Model class you are basically mapping a javascript object to a mongoDB document which is going to be sent out to mongoDB instance;
+
+      Based on the name of the Model we use, it queries the correct database collection;
+
+      The model class exposes several static and instance methods to perform operations on the database.  
+      
+      Mongoose is built on top of the MongoDB driver to provide programmers with a way to model their data and only send out modelled and structured data into the database.
+
+///////////////////////////////////////////////////////////////
+            Mongoose (about Models and Schemas)
+///////////////////////////////////////////////////////////////
+Mongoose is lets define the schema first for the documents to be saved in a particular collection and it lets you do that very easily by also applying integrity constraints along with defining the schema; Mongoose then lets you create a Model based on that schema; 
+===============
+What is Model:-
+===============
+A model is a class (you can say an interface that has some static while some instance methods) that lets you save, delete, update and read from a particular database collection; Model lets you create documents of a particular schema onto the collection it is married to;
+
+After Model in place; You then create Objects via this Model and these objects must be in consistence with that schema enforced by the Model and these objects (the instances of the Model) are representation of mongoDB documents which are going to be sent out to the server;
+
+Mongoose is an ODM (Object Data Modelling) library;
+What does that means ?
+=> Well mongoose is a wrapper around the standard core mongodb npm package, and thus provides us with a much easier way to communicate with the mongoDB server from the client;
+
+How ?
+=> It allows us to create "Data Models" that enforces a certain document schema on the client side (application layer) and also offers certain easy way such as pre written database queries in form of methods;
+=> The Models are classes which is a kind of blueprint for creating documents (not really documents but objects that are equivalent to mongoDB documents); so whenever you instantiate a model you are basically creating a document following a certain schema and structure;
+=> The schema and the structure that a Model enforces is the one that you pass to the dot .model() constructor on the mongoose interface while constructing the Model;
+
+Models
+‘Models’ themselves are also constructors that take a javascript object which should be and must be following the schema enforced by the given Model; and thus as a result it creates an instance of a document.
+
+SCHEMA VS MODELS:
+A Mongoose schema defines the structure of the document , default values, validators, etc.. and all these things are going to be enforced by the Model blueprint. 
+WHEREAS
+a Mongoose model provides an interface to the database for creating, querying, updating, deleting records, etc. and also lets you create new documents that follows a certain schema;
+
+Creating a Mongoose model comprises primarily of Two parts:
+1) Defining the "Schema":
+            A schema defines the future document's properties through an object where the key name corresponds to the property name in the collection.
+            
+            let emailSchema = new mongoose.Schema({
+            email: String
+            });
+
+2) Creating Model:
+            We need to call the model constructor on the Mongoose instance and pass it the name of the collection and a reference to the schema definition.
+
+            EmailModel = mongoose.model('emailColl', emailSchema)
+
+Now lets instantiate the model:
+
+            let msg = new EmailModel({
+                  email: 'therealilyaskhan@gmail.com'
+            });
+
+An instance of a model is called a document. Models are responsible for creating and reading documents from the underlying MongoDB database.
