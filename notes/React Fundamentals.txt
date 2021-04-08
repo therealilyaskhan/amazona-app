@@ -28,7 +28,7 @@ HOWEVER IN CASE OF SINGLE PAGE APPLICATIONS:
 --> Only ever one dot .html file on our server, which is served to the browser in the beginning;
 --> In SPA you still need to make an initial request to the server and the server gives you back that single html file;
 --> After the browser receives that initial response, the REACT takes over the application;
---> As along with the .html file the server also sends over to the client JavaScript and CSS as static assets;
+--> As along with the .html file the server also sends over to the client: JavaScript and CSS as static assets;
 --> if now you click a link to the contact page, your request won't be sent over to the server but rather would be intercepted by the REACT in the browser and will be handled by the react;
 --> based upon the URL there will be routing already coded, the react will say okay you want to see the components related to the contact page so the /contact request will be routed to a specific component and will load those components onto the UI;
 --> So what a single page application is doing is that it is showing different components to the user on the UI based upon the user actions and what actually the user is trying to see on the screen;
