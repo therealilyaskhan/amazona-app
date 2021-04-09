@@ -320,7 +320,60 @@ Static files are the once which are not dynamically evaluated but they are rathe
 middleware is a code which sits between the request and response, there are certain common type requests and tasks which can be handled via a middleware code, there are a lot of open source middleware codes readily available which you can easily plugin between request and response;
 
 Multiple levels of middleware:
-            A request is handled by a middleware(callback func) and then via a method called "next()" that request is passed to another middleware to be further handled by that and so on until the request is finally responded.
+            A request is handled by a middleware(callback func) and then via a method called "next()" that request is passed to another *QUALIFYING* middleware to be further handled by that and so on until the request is finally responded.
+
+            BY QUALIFYING I MEAN:
+                  That whenever an http request comes onto the server, the request has a certain method and route, we define different express routers to handle each request; Now lets suppose we define a middleware that should run on each and every fucking request like follows:
+
+                  app.use(customMiddleware);
+
+                  The above customMiddleWare must be able to accept three parameters: req, res, next;
+
+                  Now this customMiddleWare is a function which is going to run on each and every fucking request; and remember a middleware function is not supposed to dot .send() or dot .end() the request response cycle, rather the only purpose of its existence is to play it's role in the middle of the request response cycle that's why named: "middleware" and after performing its role, it should at the end call the "next()" function;
+
+                  What the next() function is going to do is that it will let the http request go out of the current middleware and look for lexically next qualifying routers;
+
+                  Notice the word LEXICALLY above; what that means is that let suppose we have http get request for the following route(api):
+
+                  "/api/products/123"
+
+                  Then in the given case below, considering how we have lexically put our middleware, only middleware1, middleware2, middleware3 will be run for the above http get request;
+
+                  app.use(middleware1);
+
+                  app.use(middleware2);
+
+                  app.use('/api/products/:id', middleware3)
+
+                  app.use('/api/users/:id', middleware4)
+
+                  app.get('/api/products/:id', (req, res)=>{
+                    res.status(200).send('here is your product');
+                  })
+
+                  app.use('/api/products/:id', middleware5)
+
+                  middleware4 will not run because it doesn't qualify for the get request's route, and middleware5 will not run because till then the req  res cycle will be ended :D
+
+/////////////////////////////////////////////
+        "error handler middleware"
+/////////////////////////////////////////////
+You might be wondering why we put the error handler middleware Lexically at the very end of all other middleware ?
+
+Well, each and every request handler in express is not only a controller/ a request handler function but also a middleware function which means that they have a function called "next()" available onto them, which means that if they don't want to end the request response cycle they may not and pass the req after making some tinkers to it onto the next LEXICALLY qualifying middleware, which means that if we call upon an error the:
+                      "next(error) function"
+That would mean that we are not ending the cycle but rather we got some error and we can't handle it so we want to pass it over like a football to the next qualifying middleware which is going to be an errorhandler middleware function and let that function handle the request response cycle further onward, BUT UNFORTUNATELY SUPPOSE THAT our errorHandler middleware was lexically above the request handler controller function, and the request response cycle has already passed through it uselessly, NOW this is where the term LEXICALLY WORKS, this means there would be no next qualifying middleware since no qualifying errorHandler middleware lies lexically;
+
+Also note that we don't mention a route for errorHandler middlwares, that's because we want them to be executed for each and every route and type of client request;
+
+AND ALSO NOTE THAT: 
+              if you pass something as an argument to the next() function like next(err), the next lexically qualifying middleware is going to receive this argument in its first parameter like so:
+
+              app.use((err, req, res, next)=>{
+                //handle error;
+              });
+
+              The first param is going to receive the argument passed to the next() function and then the req, the res, the next like usual;
 
 ////////////////////////////////////////////////
 SOME BASIC CONCEPTS ABOUT ENDPOINTS AND APIs
@@ -377,6 +430,9 @@ app.get('/', function (req, res) {
 /////////////////////////////////////////////
             EXPRESS JS
 /////////////////////////////////////////////
+ON A Quicker Note:
+          "Request handler", "Router function", "Route Handler" and "Controller" are all names of same thing;
+
 //Express is a routing and middleware web framework that has minimal functionality of its own: An Express application is essentially a series of middleware function calls.
 
 Middleware functions are functions that have access to the request object (req), the response object (res), and a function named next;
@@ -422,7 +478,7 @@ ROUTERS (also known as route handlers) and the app OBJECT
                             or
 Different between "express.Router" function object and the "app" Object; 
 //////////////////////////////////////////////////////////////
-A Router instance (the router) is a complete middleware and routing system; the instance of a express.Router class has everything (methods and props) that can be used to associate a set of middleware functions with a specific route; Think of the express.Router as a subset of the "app" object that the express() returns; cuz the "app" object can also achieve all these functionalities. what the "router" can't do is that it can't listen to a port; it is just used for the sake of routing URLs to middleware functions;
+A Router instance (the router) is a complete middleware and routing system; the instance of a express.Router class has everything (methods and props) that can be used to associate a set of middleware functions with a specific path; Think of the express.Router as a subset of the "app" object that the express() returns; cuz the "app" object can also achieve all these functionalities. what the "router" can't do is that it can't listen to a port; it is just used for the sake of routing URLs to middleware functions;
 
 SO:  Think of "app" as the main app AND 'router' as mini app;
 
@@ -432,7 +488,7 @@ The express.Router() was introduced in express version 4.0 and the documentation
 Remember:
     Express is a routing and middleware web framework that has minimal functionality of its own: An Express application is essentially a series of middleware function calls.
 
-Now we can bind to each "router" function object a stack of middleware function by using either the .use() or the .METHOD() methods on the "router" function object. and after these stack of functions(the middlewares) are bind to router , we via the "router" object can mount this stack of functions on a path;
+Now we can bind to each instance of express.Router() a stack of middleware function by using either the .use() or the .METHOD() methods on the "router" function object. and after these stack of functions(the middlewares) are bind to the unique instance of Router (the router) , we via the "router" object can mount this stack of functions on a path;
 
 So the middleware functions are mounted onto a path via a router function object.
 
@@ -701,5 +757,65 @@ Now imagine a case scenario:
               This way: the development server port 3000 will recognize that it’s not a static asset and is an unknown request so it will go and check if any proxies are set, and will proxy your request to http://localhost:4000/api/todos as a fallback.
 
               Keep in mind that proxy only has effect in development (with npm start), and in production this is not going to be the case, there is no proxying in production as your whole project is going to be served under the same umbrella; and proper routing would be done;
+
+////////////////////////////////////////////////
+          express-async-handler
+////////////////////////////////////////////////
+ON A SIDE NOTE:
+        "Request Handler", "Router Handler", "Controller" all are names of same thing;
+
+        An if your "controller" is an async function and if your async handler throws an error then express is not good at handling errors thrown by asynchronous controllers or functions in general
+
+        So you need to fill this gap and make express to handle errors emerged by async controllers;
+
+Remember that higher order functions are those functions that takes in as argument another function;
+
+The purpose of a HOF is normally to supercharge your function that you pass to it with some extra functionality;
+
+express async handler is one higher order middleware function that takes in your route handler function as an argument, fully loads it with entire error handling functionality and then returns its supercharged definition;
+
+and then that feature-wise extended function returned by the express-async-handler is the one that executes as your request handler;
+
+And that is capable enough to handle any errors;
+
+/////////////////////////////////////////////////////
+Only wrapping your controller function inside the express-async-handler will not be enough!!!!!
+/////////////////////////////////////////////////////
+Also in your main server.js file which listens to the user request on a particular port:
+
+Put the following app.use() router at the very bottom of all your routings;
+
+Why ?
+Because:-
+
+//app.use() with no mount path will cause the middleware function to execute every time the app receives a request. That's the reason express suggests to put it right at the very bottom of all your routings because all the above routings upon a match will end the response by either executing res.end() res.send() or res.json etc but in case none of the paths is matched, this middleware is gonna get executed alwaysss*; So when a path is not matched that path will be routed to this middleware:-
+
+app.use((err, req, res, next) => {
+  //res.status is chainable cuz it returns the response object with updated header
+  res.status(500).send(err.message);
+});
+
+/////////////////////////////////////////////////////////////////
+                      require() caching
+                      require() cache
+                      require cache
+                      require caching
+                      import caching
+                      import cache
+/////////////////////////////////////////////////////////////////
+  NodeJS Backend Runtime Environment Will Cache The Results Of The require() call Or The Import Keyword For A Particular Module When Imported For The First Time, And will maintain These Cached Instances In A Sort Of Global Array That's Available Across Your Entire Backend Server So That Then Whenever You Require() or Import The Same Module Again, You Are Not Served With A New Export "no matter wether it's a Primitive Export Or A Composite Export from inside of the module", It is For sure that the First Require of The file Will cache the exports from that file;
+
+  So on requiring that module somewhere else in your program , you will be served from that global cache array in which the "first time exports" are all saved against each module's name;
+
+REMEMBER AND ALWAYS REMEMBER THIS:
+                        Wether you use require('module') call or the import ES6 keyword to import one of the:
+                          1) 'Node's core module' such as 'http'
+                          2) third party npm module such as mongoose
+                          3) or even a user defined module
+
+For all of the above mentioned cases:-
+          once you import a particular module wether its a core one or an npm one or a user defined module, once you import a module wether that's using require or import, the "node runtime environment that's running your whole backend server" will cache your import, and then onward no matter "wherever" , "no matter in the same file or in a different file" on your server , if you ever again import a same module that you had already imported in the same file before or in some other file that is already executed by nodeJS before the current given file inside which you are again importing the module, you will not be served with a new fresh export from the file you are importing;
+
+          Rather you will be served with the same instance that was cached by the nodeJS for the first time the file was imported;
 
 */

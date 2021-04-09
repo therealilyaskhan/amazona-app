@@ -420,7 +420,7 @@ The format of a GeoJSON object is followed as:
             latitude    
       ]
 }
-
+ 
 ////////////////////
 GeoSpatial QUERIES:-
 ////////////////////
@@ -589,3 +589,24 @@ Now lets instantiate the model:
             });
 
 An instance of a model is called a document. Models are responsible for creating and reading documents from the underlying MongoDB database.
+
+///////////////////////////////////////////////////////////////
+   REUSABLE SAME MongoDB CONNECTION ACROSS MULTIPLE MODULES
+///////////////////////////////////////////////////////////////
+=>What is it that makes you able to only connect to the mongoDB cluster once from the entry server.js file and then you don't have to connect to the mongoDB cluster again but reuse the same connection across other modules on your server;
+
+=>And have you ever wondered why this feature is only like so when you use mongoose to connect to the cluster, and why do you require to establish a connection to the database inside each module before you send some queries to your server when you use the NodeJS default driver to interact with the database the "npm package mongoDB"
+
+FIRST OFF REASONS WHY CONNECTION IS REUSABLE ACROSS MULTIPLE FILES WHEN USING MONGOOSE ?
+            This is due to two reasons:
+            1) Node's nature of caching the imports <to read about nodejs this nature visit NodeJS Fundamentals notes>
+            2) Mongoose nature of saving the first ever connection to the server as a default connection;
+
+When you for the very first time require or say import mongoose from 'mongoose' inside your main server.js file, your first mongoose import is cached, now if we peek into mongoose package , it exports an object that has several methods and properties on it such as 'connect' 'connection' 'model' 'Schema' etc, Now the object exported by the mongoose library is going to be cached by nodeJS and this object is going to be the once served on every subsequent imports or requires of the 'mongoose' in the same or other files;
+
+When you for the first time connect to a cluster via the mongoose.connect() method , you first connection is saved inside this object that was exported by the mongoose library as the default database connection and now if you require mongoose in some other scripts/modules on your server, you will not be returned with a new fresh object from the mongoose but rather the cached one object will be returned to you and since that cached object is the one which has already a default database connection so you don't need to establish a connection to the database again;
+
+WHY CONNECTION IS NOT REUSABLE ACROSS MULTIPLE FILES WHEN USING mongodb DRIVER ?
+
+            This is only due to one reason:
+            1) mongodb instance no doubt is cached when you first time import the mongodb module inside your main server.js file for the first time because that's the instinct behavior of nodeJS to cache exports from modules but the problem is that the mongodb driver has no feature of saving the connection inside it; due to which you have to establish a connection inside each module via the mongodb.connect() method; 
